@@ -41,3 +41,23 @@ body {
   background: rgba(231, 201, 138, 0.28);
   color: #fff;
 }
+
+.desk-ink {
+  background:
+    radial-gradient(520px 200px at 85% 0%, rgba(231, 201, 138, 0.2), transparent 62%),
+    #07080b;
+}
+
+.desk-ledger {
+  background:
+    linear-gradient(180deg, rgba(231, 201, 138, 0.16), transparent 46%),
+    repeating-linear-gradient(180deg, transparent, transparent 21px, rgba(231, 201, 138, 0.16) 22px),
+    #14180f;
+}
+
+.desk-dusk {
+  background:
+    radial-gradient(460px 200px at 8% 0%, rgba(126, 92, 186, 0.48), transparent 64%),
+    radial-gradient(380px 180px at 100% 20%, rgba(231, 201, 138, 0.2), transparent 58%),
+    #14101c;
+}
