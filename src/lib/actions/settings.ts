@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/supabase/session";
-import { passwordSchema, profileSchema } from "@/lib/validation";
+import { passwordSchema, profileAppearanceUpdate, profileSchema } from "@/lib/validation";
 
 export async function updateProfile(input: unknown): Promise<{ ok: boolean; message: string }> {
   const parsed = profileSchema.safeParse(input);
@@ -16,14 +16,11 @@ export async function updateProfile(input: unknown): Promise<{ ok: boolean; mess
   const user = await getSessionUser();
   if (!user) return { ok: false, message: "Your session expired. Sign in again." };
 
+  const appearance = profileAppearanceUpdate(user.id, parsed.data);
+  if (!appearance.ok) return appearance;
+
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      username: parsed.data.username,
-      display_name: parsed.data.displayName,
-    })
-    .eq("id", user.id);
+  const { error } = await supabase.from("profiles").update(appearance.row).eq("id", user.id);
 
   if (error) {
     if (error.code === "23505") return { ok: false, message: "That username is already taken." };
