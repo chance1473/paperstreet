@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { asBigInt, centsTone, formatCents, formatPercent } from "@/lib/money";
+import { asBigInt, centsTone, formatCents, formatPercent, formatSignedCents } from "@/lib/money";
 import { getLeaderboard, getProfile } from "@/lib/portfolio";
 import { getSessionUser } from "@/lib/supabase/session";
 import { hasServiceRoleEnv } from "@/lib/utils";
@@ -51,6 +51,8 @@ export default async function LeaderboardPage() {
                 <tr className="border-b border-white/8">
                   <th className="px-5 py-3 font-medium">Rank</th>
                   <th className="px-3 py-3 font-medium">Trader</th>
+                  <th className="px-3 py-3 text-right font-medium">Invested</th>
+                  <th className="px-3 py-3 text-right font-medium">Profit or loss</th>
                   <th className="px-3 py-3 text-right font-medium">Portfolio value</th>
                   <th className="px-5 py-3 text-right font-medium">Return</th>
                 </tr>
@@ -62,6 +64,10 @@ export default async function LeaderboardPage() {
                     <td className="px-3 py-3">
                       <div className="font-medium">{entry.displayName}</div>
                       <div className="text-xs text-muted-foreground">@{entry.username}</div>
+                    </td>
+                    <td className="px-3 py-3 text-right font-mono">{formatCents(asBigInt(entry.investedCents))}</td>
+                    <td className={`px-3 py-3 text-right font-mono ${centsTone(asBigInt(entry.profitCents))}`}>
+                      {formatSignedCents(asBigInt(entry.profitCents))}
                     </td>
                     <td className="px-3 py-3 text-right font-mono">{formatCents(asBigInt(entry.valueCents))}</td>
                     <td className={`px-5 py-3 text-right font-mono ${centsTone(asBigInt(entry.valueCents) - 10_000_000n)}`}>
