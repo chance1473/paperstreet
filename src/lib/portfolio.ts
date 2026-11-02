@@ -1,5 +1,6 @@
 import "server-only";
 
+import { liveBookRank } from "@/lib/leaderboard-rank";
 import { getQuotes } from "@/lib/market-data/alpaca";
 import { STARTING_CASH_CENTS, asBigInt, percentFromCents, valueCents, type AssetType } from "@/lib/money";
 import { pricePositions, summarize, type AccountSummary, type PricedPosition } from "@/lib/pricing";
@@ -271,14 +272,15 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
       invested += valueCents(asBigInt(holding.quantity_units), asBigInt(price));
     }
     if (!complete) continue;
-    const value = asBigInt(account.cash_cents as number | string) + invested;
-    const pnl = value - STARTING_CASH_CENTS;
+    const ranked = liveBookRank(asBigInt(account.cash_cents as number | string), invested);
     entries.push({
       rank: 0,
       username: String(profile.username),
       displayName: String(profile.display_name),
-      valueCents: value.toString(),
-      returnPercent: percentFromCents(pnl, STARTING_CASH_CENTS) ?? 0,
+      valueCents: ranked.valueCents.toString(),
+      investedCents: ranked.investedCents.toString(),
+      profitCents: ranked.profitCents.toString(),
+      returnPercent: percentFromCents(ranked.profitCents, STARTING_CASH_CENTS) ?? 0,
     });
   }
 

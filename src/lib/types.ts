@@ -55,5 +55,7 @@ export type LeaderboardEntry = {
   username: string;
   displayName: string;
   valueCents: string;
+  investedCents: string;
+  profitCents: string;
   returnPercent: number;
 };
