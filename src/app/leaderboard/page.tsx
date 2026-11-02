@@ -42,10 +42,7 @@ export default async function LeaderboardPage() {
         <CardHeader>
           <CardTitle>Paper accounts</CardTitle>
         </CardHeader>
-        {entries.length === 0 ? (
-          <p className="px-5 py-8 text-sm text-muted-foreground">No ranked accounts yet.</p>
-        ) : (
-          <div className="overflow-x-auto">
+        <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
               <thead className="text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr className="border-b border-white/8">
@@ -58,7 +55,14 @@ export default async function LeaderboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {entries.map((entry) => (
+                {entries.length === 0 ? (
+                  <tr>
+                    <td className="px-5 py-8 text-sm text-muted-foreground" colSpan={6}>
+                      No ranked accounts yet.
+                    </td>
+                  </tr>
+                ) : (
+                  entries.map((entry) => (
                   <tr key={entry.username} className="border-b border-white/5 last:border-0">
                     <td className="px-5 py-3 font-mono">{entry.rank}</td>
                     <td className="px-3 py-3">
@@ -74,11 +78,11 @@ export default async function LeaderboardPage() {
                       {formatPercent(entry.returnPercent)}
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
-        )}
       </Card>
     </div>
   );
