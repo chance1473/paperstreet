@@ -150,7 +150,7 @@ export async function getProfile(userId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("username, display_name, created_at")
+    .select("username, display_name, created_at, avatar_path, background_choice, soundtrack_choice")
     .eq("id", userId)
     .maybeSingle();
   if (error) throw new Error("Profile is unavailable.");
@@ -159,6 +159,9 @@ export async function getProfile(userId: string) {
     username: String(data.username),
     displayName: String(data.display_name),
     createdAt: String(data.created_at),
+    avatarPath: data.avatar_path ? String(data.avatar_path) : null,
+    backgroundChoice: data.background_choice ? String(data.background_choice) : null,
+    soundtrackChoice: data.soundtrack_choice ? String(data.soundtrack_choice) : null,
   };
 }
 

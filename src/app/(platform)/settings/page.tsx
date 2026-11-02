@@ -1,8 +1,10 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PasswordForm, ProfileForm, ResetAccountButton } from "@/components/settings/settings-forms";
+import { AppearanceForm, PasswordForm, ProfileForm, ResetAccountButton } from "@/components/settings/settings-forms";
+import { deskSurface } from "@/lib/appearance";
 import { getProfile } from "@/lib/portfolio";
 import { getSessionUser } from "@/lib/supabase/session";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Settings · PaperStreet" };
 
@@ -14,9 +16,11 @@ export default async function SettingsPage() {
     ? new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(new Date(profile.createdAt))
     : "—";
 
+  const surface = deskSurface(profile?.backgroundChoice);
+
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <PageHeader title="Settings" description="Profile, password, and paper-account controls." />
+    <div className={cn("mx-auto max-w-2xl space-y-6 rounded-xl", surface.className)} style={surface.style}>
+      <PageHeader title="Settings" description="Profile, appearance, password, and paper-account controls." />
       <Card>
         <CardHeader>
           <CardTitle>Account</CardTitle>
@@ -34,6 +38,25 @@ export default async function SettingsPage() {
         <CardContent>
           {profile ? (
             <ProfileForm username={profile.username} displayName={profile.displayName} />
+          ) : (
+            <p className="text-sm text-muted-foreground">Profile data is unavailable.</p>
+          )}
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Appearance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {profile ? (
+            <AppearanceForm
+              userId={user.id}
+              username={profile.username}
+              displayName={profile.displayName}
+              avatarPath={profile.avatarPath}
+              backgroundChoice={profile.backgroundChoice}
+              soundtrackChoice={profile.soundtrackChoice}
+            />
           ) : (
             <p className="text-sm text-muted-foreground">Profile data is unavailable.</p>
           )}
