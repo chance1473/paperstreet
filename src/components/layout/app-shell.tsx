@@ -11,6 +11,7 @@ import {
   Menu,
   Settings,
   Star,
+  Timer,
   Trophy,
 } from "lucide-react";
 import { useState } from "react";
@@ -24,6 +25,7 @@ import { cn } from "@/lib/utils";
 const TRADE = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/markets", label: "Markets", icon: LineChart },
+  { href: "/simulated", label: "Practice", icon: Timer },
   { href: "/portfolio", label: "Portfolio", icon: Briefcase },
   { href: "/watchlist", label: "Watchlist", icon: Star },
   { href: "/transactions", label: "Transactions", icon: ArrowLeftRight },
