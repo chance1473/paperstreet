@@ -93,6 +93,19 @@ User-facing crypto symbols are `BTC`, `ETH`, and so on. Requests use Alpaca pair
 
 Quotes are cached for about 10 seconds, bars for 60 seconds, and the asset universe for 6 hours. Pages poll quotes every 15 seconds instead of opening a browser WebSocket, so the Alpaca secret never reaches client JavaScript. Closed markets keep the last trade and show a market-closed badge when the clock says the equity session is shut. Missing symbols, rate limits, and network failures surface as empty prices or a short error banner.
 
+## Supported startup
+
+Prerequisite: Node.js 22. Copy `.env.example` to `.env.local` and fill in the values from the table above. Alpaca keys are optional; without them the app uses Yahoo Finance for quotes.
+
+```bash
+npm install
+npm start
+```
+
+`npm start` runs `node scripts/serve.mjs`. The process listens on `PORT` (default 3000) before Next finishes booting. Open `http://localhost:3000`.
+
+`npm run dev` uses the same listener. A local Supabase stack is required for signup, trades, and the live leaderboard. GitHub checks install with `npm ci` and run `npm test` on Node 22.
+
 ## Local development
 
 ```bash
