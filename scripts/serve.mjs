@@ -1,6 +1,16 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
 
+for (const signal of ["SIGHUP", "SIGPIPE"]) {
+  process.on(signal, () => {});
+}
+process.on("uncaughtException", (error) => {
+  console.error(error);
+});
+process.on("unhandledRejection", (error) => {
+  console.error(error);
+});
+
 const port = Number(process.env.PORT || 3000);
 const internalPort = port + 1;
 const fallback = `<!doctype html>
@@ -46,9 +56,13 @@ const server = http.createServer((req, res) => {
   req.pipe(proxy);
 });
 
-server.listen(port, () => {
+server.on("error", (error) => {
+  console.error(error);
+});
+server.listen(port, "0.0.0.0", () => {
   console.log(`http://127.0.0.1:${port}`);
 });
+setInterval(() => {}, 60_000);
 
 function markReady() {
   const probe = http.get(`http://127.0.0.1:${internalPort}/leaderboard`, (response) => {
@@ -66,7 +80,7 @@ const child = spawn(
   "npx",
   ["next", "dev", "--webpack", "--hostname", "127.0.0.1", "--port", String(internalPort)],
   {
-    stdio: "inherit",
+    stdio: ["ignore", "inherit", "inherit"],
     env: { ...process.env, HOSTNAME: "127.0.0.1", PORT: String(internalPort) },
   },
 );
