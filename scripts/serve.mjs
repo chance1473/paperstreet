@@ -46,8 +46,8 @@ const server = http.createServer((req, res) => {
   req.pipe(proxy);
 });
 
-server.listen(port, "0.0.0.0", () => {
-  console.log(`listening on 0.0.0.0:${port}`);
+server.listen(port, () => {
+  console.log(`http://127.0.0.1:${port}`);
 });
 
 function markReady() {
