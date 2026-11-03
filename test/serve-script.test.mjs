@@ -7,7 +7,8 @@ test("dev and start listen without a production build", () => {
   const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
   assert.equal(pkg.scripts.dev, "node scripts/serve.mjs");
   assert.equal(pkg.scripts.start, "node scripts/serve.mjs");
-  assert.match(script, /next", "dev", "--webpack"/);
-  assert.match(script, /const hostname = "0\.0\.0\.0"/);
-  assert.doesNotMatch(script, /process\.env\.HOSTNAME/);
+  assert.match(script, /server\.listen\(port, "0\.0\.0\.0"/);
+  assert.match(script, /Invested/);
+  assert.match(script, /Profit or loss/);
+  assert.doesNotMatch(script, /process\.exit/);
 });
