@@ -60,6 +60,12 @@ export function profileImagePublicUrl(path: string | null | undefined) {
   return `${base}/storage/v1/object/public/${PROFILE_IMAGE_BUCKET}/${encoded}`;
 }
 
+export function ownedProfileImageUrl(userId: string, path: string | null | undefined) {
+  if (!/^[0-9a-f-]{8,}$/i.test(userId) || !path) return null;
+  if (path.split("/").includes("..") || !path.startsWith(`${userId}/`)) return null;
+  return profileImagePublicUrl(path);
+}
+
 export function soundtrackSrc(choice: string | null | undefined) {
   return SOUNDTRACKS.find((track) => track.id === choice)?.src ?? null;
 }

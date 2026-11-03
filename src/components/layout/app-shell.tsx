@@ -39,9 +39,11 @@ const ACCOUNT = [
 export function AppShell({
   children,
   displayName,
+  avatarUrl,
 }: {
   children: React.ReactNode;
   displayName: string;
+  avatarUrl?: string | null;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -53,7 +55,7 @@ export function AppShell({
           <Wordmark href="/dashboard" compact />
         </div>
         <Nav pathname={pathname} />
-        <Account displayName={displayName} />
+        <Account displayName={displayName} avatarUrl={avatarUrl} />
       </aside>
 
       <div className="md:pl-60">
@@ -80,7 +82,7 @@ export function AppShell({
           <div onClick={() => setOpen(false)}>
             <Nav pathname={pathname} />
           </div>
-          <Account displayName={displayName} />
+          <Account displayName={displayName} avatarUrl={avatarUrl} />
         </DialogContent>
       </Dialog>
     </div>
@@ -135,14 +137,18 @@ function NavGroup({
   );
 }
 
-function Account({ displayName }: { displayName: string }) {
+function Account({ displayName, avatarUrl }: { displayName: string; avatarUrl?: string | null }) {
   const initial = displayName.slice(0, 1).toUpperCase();
   return (
     <div className="border-t border-white/8 p-3">
       <div className="flex items-center gap-2 px-2 py-1">
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-white/8 text-xs font-medium">
-          {initial}
-        </span>
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="Profile picture" className="h-8 w-8 rounded-full object-cover" />
+        ) : (
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-white/8 text-xs font-medium">
+            {initial}
+          </span>
+        )}
         <span className="truncate text-sm">{displayName}</span>
       </div>
       <form action={signOut}>

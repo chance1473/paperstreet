@@ -1,5 +1,6 @@
 import "server-only";
 
+import { ownedProfileImageUrl } from "@/lib/appearance";
 import { liveBookRank } from "@/lib/leaderboard-rank";
 import { getQuotes } from "@/lib/market-data/alpaca";
 import { STARTING_CASH_CENTS, asBigInt, percentFromCents, valueCents, type AssetType } from "@/lib/money";
@@ -220,22 +221,94 @@ export async function recordSnapshot(
   });
 }
 
-export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
+type BoardProfile = {
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_path: string | null;
+};
+
+type CashAccount = {
+  user_id: string;
+  cash_cents: number | string;
+};
+
+function groupHoldings(rows: (PositionRow & { user_id: string })[]) {
+  const byUser = new Map<string, (PositionRow & { user_id: string })[]>();
+  for (const position of rows) {
+    const list = byUser.get(position.user_id) ?? [];
+    list.push(position);
+    byUser.set(position.user_id, list);
+  }
+  return byUser;
+}
+
+function rankBooks(
+  book: LeaderboardEntry["book"],
+  accountRows: CashAccount[],
+  profileRows: BoardProfile[],
+  holdingsByUser: Map<string, (PositionRow & { user_id: string })[]>,
+  quoteMap: Map<string, string>,
+): LeaderboardEntry[] {
+  const entries: LeaderboardEntry[] = [];
+  for (const account of accountRows) {
+    const profile = profileRows.find((row) => row.id === account.user_id);
+    if (!profile) continue;
+    const holdings = holdingsByUser.get(account.user_id) ?? [];
+    let complete = true;
+    let invested = 0n;
+    for (const holding of holdings) {
+      const price = quoteMap.get(`${holding.asset_type}:${holding.symbol}`);
+      if (!price) {
+        complete = false;
+        break;
+      }
+      invested += valueCents(asBigInt(holding.quantity_units), asBigInt(price));
+    }
+    if (!complete) continue;
+    const ranked = liveBookRank(asBigInt(account.cash_cents), invested);
+    entries.push({
+      rank: 0,
+      book,
+      username: String(profile.username),
+      displayName: String(profile.display_name),
+      valueCents: ranked.valueCents.toString(),
+      investedCents: ranked.investedCents.toString(),
+      profitCents: ranked.profitCents.toString(),
+      returnPercent: percentFromCents(ranked.profitCents, STARTING_CASH_CENTS) ?? 0,
+      avatarUrl: ownedProfileImageUrl(account.user_id, profile.avatar_path ? String(profile.avatar_path) : null),
+    });
+  }
+
+  entries.sort((a, b) => {
+    const delta = asBigInt(b.valueCents) - asBigInt(a.valueCents);
+    if (delta > 0n) return 1;
+    if (delta < 0n) return -1;
+    return a.username.localeCompare(b.username);
+  });
+
+  return entries.map((entry, index) => ({ ...entry, rank: index + 1 }));
+}
+
+export async function getLeaderboard(): Promise<{ live: LeaderboardEntry[]; practice: LeaderboardEntry[] }> {
   const admin = createAdminClient();
-  if (!admin) return [];
+  if (!admin) return { live: [], practice: [] };
 
-  const [{ data: profiles }, { data: accounts }, { data: positions }] = await Promise.all([
-    admin.from("profiles").select("id, username, display_name"),
-    admin.from("paper_accounts").select("user_id, cash_cents"),
-    admin.from("positions").select("user_id, symbol, asset_type, quantity_units, avg_price_micros"),
-  ]);
+  const [{ data: profiles }, { data: accounts }, { data: positions }, { data: simulatedAccounts }, { data: simulatedPositions }] =
+    await Promise.all([
+      admin.from("profiles").select("id, username, display_name, avatar_path"),
+      admin.from("paper_accounts").select("user_id, cash_cents"),
+      admin.from("positions").select("user_id, symbol, asset_type, quantity_units, avg_price_micros"),
+      admin.from("simulated_accounts").select("user_id, cash_cents"),
+      admin.from("simulated_positions").select("user_id, symbol, asset_type, quantity_units, avg_price_micros"),
+    ]);
 
-  const profileRows = profiles ?? [];
-  const accountRows = accounts ?? [];
-  const positionRows = (positions ?? []) as (PositionRow & { user_id: string })[];
+  const profileRows = (profiles ?? []) as BoardProfile[];
+  const liveRows = (positions ?? []) as (PositionRow & { user_id: string })[];
+  const practiceRows = (simulatedPositions ?? []) as (PositionRow & { user_id: string })[];
 
   const symbols = new Map<string, { symbol: string; assetType: AssetType }>();
-  for (const position of positionRows) {
+  for (const position of [...liveRows, ...practiceRows]) {
     symbols.set(`${position.asset_type}:${position.symbol}`, {
       symbol: position.symbol,
       assetType: position.asset_type,
@@ -252,47 +325,14 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
     );
   }
 
-  const byUser = new Map<string, (PositionRow & { user_id: string })[]>();
-  for (const position of positionRows) {
-    const list = byUser.get(position.user_id) ?? [];
-    list.push(position);
-    byUser.set(position.user_id, list);
-  }
-
-  const entries: LeaderboardEntry[] = [];
-  for (const account of accountRows) {
-    const profile = profileRows.find((row) => row.id === account.user_id);
-    if (!profile) continue;
-    const holdings = byUser.get(account.user_id) ?? [];
-    let complete = true;
-    let invested = 0n;
-    for (const holding of holdings) {
-      const price = quoteMap.get(`${holding.asset_type}:${holding.symbol}`);
-      if (!price) {
-        complete = false;
-        break;
-      }
-      invested += valueCents(asBigInt(holding.quantity_units), asBigInt(price));
-    }
-    if (!complete) continue;
-    const ranked = liveBookRank(asBigInt(account.cash_cents as number | string), invested);
-    entries.push({
-      rank: 0,
-      username: String(profile.username),
-      displayName: String(profile.display_name),
-      valueCents: ranked.valueCents.toString(),
-      investedCents: ranked.investedCents.toString(),
-      profitCents: ranked.profitCents.toString(),
-      returnPercent: percentFromCents(ranked.profitCents, STARTING_CASH_CENTS) ?? 0,
-    });
-  }
-
-  entries.sort((a, b) => {
-    const delta = asBigInt(b.valueCents) - asBigInt(a.valueCents);
-    if (delta > 0n) return 1;
-    if (delta < 0n) return -1;
-    return a.username.localeCompare(b.username);
-  });
-
-  return entries.map((entry, index) => ({ ...entry, rank: index + 1 }));
+  return {
+    live: rankBooks("live", (accounts ?? []) as CashAccount[], profileRows, groupHoldings(liveRows), quoteMap),
+    practice: rankBooks(
+      "practice",
+      (simulatedAccounts ?? []) as CashAccount[],
+      profileRows,
+      groupHoldings(practiceRows),
+      quoteMap,
+    ),
+  };
 }
