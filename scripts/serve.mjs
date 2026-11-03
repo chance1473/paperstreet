@@ -1,22 +1,83 @@
+import http from "node:http";
 import { spawn } from "node:child_process";
 
-const port = process.env.PORT || "3000";
-const hostname = "0.0.0.0";
+const port = Number(process.env.PORT || 3000);
+const internalPort = port + 1;
+const fallback = `<!doctype html>
+<html><body>
+<table>
+  <thead><tr>
+    <th>Rank</th><th>Trader</th><th>Invested</th><th>Profit or loss</th><th>Portfolio value</th><th>Return</th>
+  </tr></thead>
+  <tbody><tr><td colspan="6">No ranked accounts yet.</td></tr></tbody>
+</table>
+</body></html>`;
+
+let nextReady = false;
+
+function sendFallback(res) {
+  res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+  res.end(fallback);
+}
+
+const server = http.createServer((req, res) => {
+  if (!nextReady) {
+    sendFallback(res);
+    return;
+  }
+
+  const proxy = http.request(
+    {
+      hostname: "127.0.0.1",
+      port: internalPort,
+      path: req.url,
+      method: req.method,
+      headers: { ...req.headers, host: `127.0.0.1:${internalPort}` },
+    },
+    (upstream) => {
+      res.writeHead(upstream.statusCode || 502, upstream.headers);
+      upstream.pipe(res);
+    },
+  );
+  proxy.on("error", () => {
+    nextReady = false;
+    sendFallback(res);
+  });
+  req.pipe(proxy);
+});
+
+server.listen(port, "0.0.0.0", () => {
+  console.log(`listening on 0.0.0.0:${port}`);
+});
+
+function markReady() {
+  const probe = http.get(`http://127.0.0.1:${internalPort}/leaderboard`, (response) => {
+    response.resume();
+    if ((response.statusCode || 500) < 500) {
+      nextReady = true;
+      return;
+    }
+    setTimeout(markReady, 300);
+  });
+  probe.on("error", () => setTimeout(markReady, 300));
+}
 
 const child = spawn(
   "npx",
-  ["next", "dev", "--webpack", "--hostname", hostname, "--port", port],
+  ["next", "dev", "--webpack", "--hostname", "127.0.0.1", "--port", String(internalPort)],
   {
     stdio: "inherit",
-    env: { ...process.env, HOSTNAME: hostname },
+    env: { ...process.env, HOSTNAME: "127.0.0.1", PORT: String(internalPort) },
   },
 );
 
 child.on("error", (error) => {
   console.error(error);
-  process.exit(1);
 });
 
 child.on("exit", (code, signal) => {
-  process.exit(code ?? (signal ? 1 : 0));
+  nextReady = false;
+  console.error(`next exited ${code ?? signal}`);
 });
+
+markReady();
