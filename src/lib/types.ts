@@ -52,10 +52,12 @@ export type ChartBar = {
 
 export type LeaderboardEntry = {
   rank: number;
+  book: "live" | "practice";
   username: string;
   displayName: string;
   valueCents: string;
   investedCents: string;
   profitCents: string;
   returnPercent: number;
+  avatarUrl: string | null;
 };
