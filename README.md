@@ -106,6 +106,8 @@ npm start
 
 `npm run dev` uses the same listener. A local Supabase stack is required for signup, trades, and the live leaderboard. GitHub checks install with `npm ci` and run `npm test` on Node 22.
 
+The deploy branch `main` is protected. It cannot be force-pushed or deleted.
+
 ## Local development
 
 ```bash
