@@ -20,6 +20,14 @@ test("the signup lock migration revokes direct execute", () => {
   assert.match(migration, /revoke execute on function public\.handle_new_user\(\) from authenticated;/);
 });
 
+test("signup creates the paper book at 10000000 cents", () => {
+  assert.match(original, /create trigger on_auth_user_created/);
+  assert.match(original, /after insert on auth\.users/);
+  assert.match(original, /cash_cents bigint not null default 10000000/);
+  assert.match(original, /insert into public\.paper_accounts \(user_id, cash_cents\)/);
+  assert.match(original, /values \(new\.id, 10000000\)/);
+});
+
 test("the original paperstreet migration is not edited to revoke the signup function", () => {
   assert.match(original, /create or replace function public\.handle_new_user\(\)/);
   assert.match(original, /create trigger on_auth_user_created/);
