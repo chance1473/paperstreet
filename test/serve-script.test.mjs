@@ -17,6 +17,7 @@ test("dev and start listen without a production build", () => {
   assert.match(script, /Invested/);
   assert.match(script, /Profit or loss/);
   assert.match(script, /SIGHUP/);
+  assert.match(script, /SIGQUIT/);
   assert.match(script, /0\.0\.0\.0/);
   assert.doesNotMatch(script, /process\.exit/);
 });

@@ -1,7 +1,7 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
 
-for (const signal of ["SIGHUP", "SIGPIPE"]) {
+for (const signal of ["SIGHUP", "SIGPIPE", "SIGQUIT"]) {
   process.on(signal, () => {});
 }
 process.on("uncaughtException", (error) => {
