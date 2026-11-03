@@ -1,12 +1,15 @@
 import { spawn } from "node:child_process";
 
 const port = process.env.PORT || "3000";
-const hostname = process.env.HOSTNAME || "0.0.0.0";
+const hostname = "0.0.0.0";
 
 const child = spawn(
   "npx",
   ["next", "dev", "--webpack", "--hostname", hostname, "--port", port],
-  { stdio: "inherit" },
+  {
+    stdio: "inherit",
+    env: { ...process.env, HOSTNAME: hostname },
+  },
 );
 
 child.on("error", (error) => {

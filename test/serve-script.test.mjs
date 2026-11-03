@@ -8,4 +8,6 @@ test("dev and start listen without a production build", () => {
   assert.equal(pkg.scripts.dev, "node scripts/serve.mjs");
   assert.equal(pkg.scripts.start, "node scripts/serve.mjs");
   assert.match(script, /next", "dev", "--webpack"/);
+  assert.match(script, /const hostname = "0\.0\.0\.0"/);
+  assert.doesNotMatch(script, /process\.env\.HOSTNAME/);
 });
