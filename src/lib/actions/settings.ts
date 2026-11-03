@@ -8,13 +8,13 @@ import { getSessionUser } from "@/lib/supabase/session";
 import { passwordSchema, profileAppearanceUpdate, profileSchema } from "@/lib/validation";
 
 export async function updateProfile(input: unknown): Promise<{ ok: boolean; message: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, message: "Your session expired. Sign in again." };
+
   const parsed = profileSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, message: parsed.error.issues[0]?.message ?? "Check your profile details." };
   }
-
-  const user = await getSessionUser();
-  if (!user) return { ok: false, message: "Your session expired. Sign in again." };
 
   const appearance = profileAppearanceUpdate(user.id, parsed.data);
   if (!appearance.ok) return appearance;
@@ -33,6 +33,9 @@ export async function updateProfile(input: unknown): Promise<{ ok: boolean; mess
 }
 
 export async function updatePassword(input: unknown): Promise<{ ok: boolean; message: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, message: "Your session expired. Sign in again." };
+
   const record = typeof input === "object" && input ? (input as Record<string, unknown>) : {};
   const password = passwordSchema.safeParse(record.password);
   if (!password.success) {
@@ -41,9 +44,6 @@ export async function updatePassword(input: unknown): Promise<{ ok: boolean; mes
   if (password.data !== record.confirm) {
     return { ok: false, message: "Passwords do not match." };
   }
-
-  const user = await getSessionUser();
-  if (!user) return { ok: false, message: "Your session expired. Sign in again." };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password: password.data });

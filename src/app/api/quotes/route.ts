@@ -2,11 +2,14 @@ import { NextResponse } from "next/server";
 
 import { MarketDataError, getQuotes } from "@/lib/market-data/alpaca";
 import { isAssetType } from "@/lib/symbols";
-import { getSessionUser } from "@/lib/supabase/session";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Your session expired. Sign in again." }, { status: 401 });
+  const supabase = await createClient();
+  const { data, error: sessionError } = await supabase.auth.getUser();
+  if (sessionError || !data.user) {
+    return NextResponse.json({ error: "Your session expired. Sign in again." }, { status: 401 });
+  }
 
   let payload: unknown;
   try {
