@@ -9,11 +9,11 @@ import { getSessionUser } from "@/lib/supabase/session";
 import { watchlistSchema } from "@/lib/validation";
 
 export async function addToWatchlist(input: unknown): Promise<{ ok: boolean; message: string }> {
-  const parsed = watchlistSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, message: "That asset could not be added." };
-
   const user = await getSessionUser();
   if (!user) return { ok: false, message: "Your session expired. Sign in again." };
+
+  const parsed = watchlistSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, message: "That asset could not be added." };
 
   const symbol = normalizeSymbol(parsed.data.symbol);
   const { assetType } = parsed.data;
@@ -48,11 +48,11 @@ export async function addToWatchlist(input: unknown): Promise<{ ok: boolean; mes
 }
 
 export async function removeFromWatchlist(input: unknown): Promise<{ ok: boolean; message: string }> {
-  const parsed = watchlistSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, message: "That asset could not be removed." };
-
   const user = await getSessionUser();
   if (!user) return { ok: false, message: "Your session expired. Sign in again." };
+
+  const parsed = watchlistSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, message: "That asset could not be removed." };
 
   const symbol = normalizeSymbol(parsed.data.symbol);
   const supabase = await createClient();

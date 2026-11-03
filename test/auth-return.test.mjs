@@ -12,6 +12,9 @@ test("the confirmation callback exchanges the code and stays on this app", () =>
   assert.match(callback, /!next\.startsWith\("\/\/"\)/);
   assert.match(callback, /!next\.includes\(":\/\/"\)/);
   assert.match(callback, /return "\/dashboard"/);
+  assert.match(callback, /tooManyAttempts\(request\)/);
+  assert.match(callback, /status: 429/);
+  assert.match(callback, /MAX_ATTEMPTS = 8/);
 });
 
 test("sign-in opens the dashboard and the shell can sign out", () => {
