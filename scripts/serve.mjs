@@ -1,7 +1,7 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
 
-for (const signal of ["SIGHUP", "SIGPIPE", "SIGQUIT"]) {
+for (const signal of ["SIGHUP", "SIGPIPE", "SIGQUIT", "SIGTERM"]) {
   process.on(signal, () => {});
 }
 process.on("uncaughtException", (error) => {
@@ -45,7 +45,11 @@ const server = http.createServer((req, res) => {
       headers: { ...req.headers, host: `127.0.0.1:${internalPort}` },
     },
     (upstream) => {
-      res.writeHead(upstream.statusCode || 502, upstream.headers);
+      const headers = { ...upstream.headers };
+      delete headers["transfer-encoding"];
+      delete headers["content-length"];
+      delete headers.connection;
+      res.writeHead(upstream.statusCode || 502, headers);
       upstream.pipe(res);
     },
   );
@@ -56,6 +60,30 @@ const server = http.createServer((req, res) => {
   req.pipe(proxy);
 });
 
+server.on("upgrade", (req, socket, head) => {
+  const proxy = http.request({
+    hostname: "127.0.0.1",
+    port: internalPort,
+    path: req.url,
+    method: req.method,
+    headers: { ...req.headers, host: `127.0.0.1:${internalPort}` },
+  });
+  proxy.on("upgrade", (upstream, upstreamSocket, upstreamHead) => {
+    const headerLines = Object.entries(upstream.headers).flatMap(([key, value]) => {
+      const values = Array.isArray(value) ? value : [value];
+      return values.filter(Boolean).map((item) => `${key}: ${item}`);
+    });
+    socket.write(
+      `HTTP/1.1 ${upstream.statusCode} ${upstream.statusMessage}\r\n${headerLines.join("\r\n")}\r\n\r\n`,
+    );
+    if (upstreamHead.length) socket.write(upstreamHead);
+    upstreamSocket.pipe(socket);
+    socket.pipe(upstreamSocket);
+  });
+  proxy.on("error", () => socket.destroy());
+  if (head.length) proxy.write(head);
+  proxy.end();
+});
 server.on("error", (error) => {
   console.error(error);
 });

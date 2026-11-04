@@ -6,7 +6,7 @@
     "dev": "node scripts/serve.mjs",
     "build": "next build",
     "start": "node scripts/serve.mjs",
-    "postinstall": "node -e \"console.log('PAPERSTREET_READY')\"",
+    "postinstall": "node scripts/ready.mjs",
     "lint": "eslint",
     "test": "node --experimental-strip-types --test test/*.test.mjs",
     "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test"

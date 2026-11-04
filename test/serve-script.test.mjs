@@ -18,6 +18,10 @@ test("dev and start listen without a production build", () => {
   assert.match(script, /Profit or loss/);
   assert.match(script, /SIGHUP/);
   assert.match(script, /SIGQUIT/);
+  assert.match(script, /SIGTERM/);
+  assert.equal(pkg.scripts.postinstall, "node scripts/ready.mjs");
   assert.match(script, /0\.0\.0\.0/);
+  assert.match(script, /delete headers\["transfer-encoding"\]/);
+  assert.match(script, /server\.on\("upgrade"/);
   assert.doesNotMatch(script, /process\.exit/);
 });
