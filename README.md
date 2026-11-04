@@ -4,6 +4,8 @@ A paper brokerage for US stocks and cryptocurrency. Live prices come from Alpaca
 
 **Paper trading only — no real money.**
 
+Sign-in failures, order failures, and page render errors are appended to `logs/journey-errors.log`. Passwords, tokens, and keys are redacted. The directory is not committed.
+
 ## Stack
 
 - Next.js (App Router), React, TypeScript
