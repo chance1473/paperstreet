@@ -87,21 +87,32 @@ export function AppearanceForm({
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const backgroundInputRef = useRef<HTMLInputElement>(null);
   const [background, setBackground] = useState(backgroundChoice);
+  const [seenBackground, setSeenBackground] = useState(backgroundChoice);
   const [soundtrack, setSoundtrack] = useState(soundtrackChoice);
+  const [seenSoundtrack, setSeenSoundtrack] = useState(soundtrackChoice);
   const [localAvatar, setLocalAvatar] = useState<string | null>(null);
   const [localBackground, setLocalBackground] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [imageBust, setImageBust] = useState<number | null>(null);
+  const bustSource = `${avatarPath ?? ""}\0${background ?? ""}`;
+  const [seenBustSource, setSeenBustSource] = useState(bustSource);
   const savedAvatar = profileImagePublicUrl(avatarPath);
 
-  useEffect(() => {
+  if (backgroundChoice !== seenBackground) {
+    setSeenBackground(backgroundChoice);
     setBackground(backgroundChoice);
-  }, [backgroundChoice]);
+  }
 
-  useEffect(() => {
+  if (soundtrackChoice !== seenSoundtrack) {
+    setSeenSoundtrack(soundtrackChoice);
     setSoundtrack(soundtrackChoice);
-  }, [soundtrackChoice]);
+  }
+
+  if (bustSource !== seenBustSource) {
+    setSeenBustSource(bustSource);
+    setImageBust(Date.now());
+  }
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -111,7 +122,8 @@ export function AppearanceForm({
   }, []);
 
   useEffect(() => {
-    setImageBust(Date.now());
+    const id = window.setTimeout(() => setImageBust(Date.now()), 0);
+    return () => window.clearTimeout(id);
   }, [avatarPath, background]);
 
   const remoteBackground =

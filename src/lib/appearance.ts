@@ -16,6 +16,10 @@ export type ProfileImageKind = "avatar" | "background";
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export type ProfileImageContentType = (typeof IMAGE_TYPES)[number];
 
+function isProfileImageContentType(value: string): value is ProfileImageContentType {
+  return (IMAGE_TYPES as readonly string[]).includes(value);
+}
+
 export function isBuiltInBackground(value: string | null | undefined): value is BuiltInBackground {
   return value === "ink" || value === "ledger" || value === "dusk";
 }
@@ -40,7 +44,7 @@ export function inspectProfileImage(file: { type: string; size: number; name?: s
     if (extension === "png") type = "image/png";
     if (extension === "webp") type = "image/webp";
   }
-  if (type !== "image/jpeg" && type !== "image/png" && type !== "image/webp") {
+  if (!isProfileImageContentType(type)) {
     return { ok: false, message: "Use a JPEG, PNG, or WebP image." };
   }
   if (!Number.isFinite(file.size) || file.size <= 0 || file.size > PROFILE_IMAGE_MAX_BYTES) {
