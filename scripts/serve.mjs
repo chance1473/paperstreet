@@ -45,7 +45,11 @@ const server = http.createServer((req, res) => {
       headers: { ...req.headers, host: `127.0.0.1:${internalPort}` },
     },
     (upstream) => {
-      res.writeHead(upstream.statusCode || 502, upstream.headers);
+      const headers = { ...upstream.headers };
+      delete headers["transfer-encoding"];
+      delete headers["content-length"];
+      delete headers.connection;
+      res.writeHead(upstream.statusCode || 502, headers);
       upstream.pipe(res);
     },
   );
