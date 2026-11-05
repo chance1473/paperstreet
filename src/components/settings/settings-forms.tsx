@@ -400,6 +400,7 @@ export function PasswordForm() {
   function submit(formData: FormData) {
     startTransition(async () => {
       const result = await updatePassword({
+        current: String(formData.get("current") ?? ""),
         password: String(formData.get("password") ?? ""),
         confirm: String(formData.get("confirm") ?? ""),
       });
@@ -410,6 +411,10 @@ export function PasswordForm() {
 
   return (
     <form action={submit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="current">Current password</Label>
+        <Input id="current" name="current" type="password" autoComplete="current-password" />
+      </div>
       <div className="space-y-2">
         <Label htmlFor="password">New password</Label>
         <Input id="password" name="password" type="password" autoComplete="new-password" />
