@@ -69,6 +69,8 @@ export async function placeOrder(input: unknown): Promise<{ ok: true; message: s
     if (error instanceof MarketDataError) {
       return { ok: false, message: error.message };
     }
+    const { recordJourneyError } = await import("@/lib/errors");
+    recordJourneyError("order", error);
     return { ok: false, message: "A live price could not be retrieved." };
   }
 

@@ -24,6 +24,11 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
     });
     setPending(false);
     if (signInError) {
+      void fetch("/api/errors", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ source: "sign-in", message: "Sign-in failed" }),
+      });
       setError("Email or password is incorrect.");
       return;
     }
