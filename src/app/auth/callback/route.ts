@@ -38,7 +38,11 @@ function appPath(next: string) {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = appPath(url.searchParams.get("next") ?? "/dashboard");
+  const requested = url.searchParams.get("next") ?? "/dashboard";
+  const next = appPath(requested);
+  if (next !== requested) {
+    return NextResponse.redirect(new URL("/login?error=auth", url.origin));
+  }
 
   if (code && tooManyAttempts(request)) {
     return new NextResponse("Too many confirmation attempts. Wait a minute and try again.", {
