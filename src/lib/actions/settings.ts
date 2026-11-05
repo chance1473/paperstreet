@@ -45,7 +45,16 @@ export async function updatePassword(input: unknown): Promise<{ ok: boolean; mes
     return { ok: false, message: "Passwords do not match." };
   }
 
+  const current = typeof record.current === "string" ? record.current : "";
+  if (!current || !user.email) return { ok: false, message: "Enter your current password." };
+
   const supabase = await createClient();
+  const { error: reauthError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: current,
+  });
+  if (reauthError) return { ok: false, message: "Your current password is not correct." };
+
   const { error } = await supabase.auth.updateUser({ password: password.data });
   if (error) return { ok: false, message: "Password could not be updated." };
   return { ok: true, message: "Password updated." };
