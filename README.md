@@ -29,6 +29,20 @@ Account value is cash plus the current market value of positions. It is not an e
 1. A [Supabase](https://supabase.com) project.
 2. An [Alpaca](https://alpaca.markets) account with **market data** keys. Do not place live or paper orders through Alpaca. PaperStreet only calls market-data and asset-reference endpoints.
 
+Paid services a deployment can turn on:
+
+- Supabase, for auth and the database.
+- Alpaca, for market data.
+
+The local app can run without either bill: local Supabase, and public quotes when Alpaca keys are absent. No other paid service is used.
+
+Where each spending alert and hard stop is set:
+
+- Supabase: the organization billing page in the Supabase dashboard. The alert and the hard stop live there, not in this repository.
+- Alpaca: the account billing page in the Alpaca dashboard. The alert and the hard stop live there, not in this repository.
+
+This file records those places only. It does not store amounts, account ids, or secrets.
+
 ## Environment variables
 
 Copy the example file and fill it in:
