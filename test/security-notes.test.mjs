@@ -20,3 +20,10 @@ test("the anonymous error endpoint is bounded", () => {
   assert.match(route, /MAX_MESSAGE_CHARS/);
   assert.ok(route.indexOf("limited(request)") < route.indexOf("recordJourneyError("));
 });
+
+test("the callback only redirects to known pages on this app", () => {
+  const route = read("src/app/auth/callback/route.ts");
+  assert.match(route, /DESTINATIONS\.find\(\(path\) => path === next\)/);
+  assert.match(route, /new URL\(destination\(next\), url\.origin\)/);
+  assert.doesNotMatch(route, /new URL\(next, url\.origin\)/);
+});

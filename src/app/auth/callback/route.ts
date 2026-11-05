@@ -23,6 +23,21 @@ function tooManyAttempts(request: Request) {
   return current.count > MAX_ATTEMPTS;
 }
 
+const DESTINATIONS = [
+  "/dashboard",
+  "/portfolio",
+  "/markets",
+  "/watchlist",
+  "/transactions",
+  "/settings",
+  "/simulated",
+  "/leaderboard",
+] as const;
+
+function destination(next: string) {
+  return DESTINATIONS.find((path) => path === next) ?? "/dashboard";
+}
+
 function appPath(next: string) {
   if (
     next.startsWith("/") &&
@@ -54,7 +69,7 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(new URL(next, url.origin));
+      return NextResponse.redirect(new URL(destination(next), url.origin));
     }
   }
 
