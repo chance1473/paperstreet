@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 
 import { CHART_RANGES, MarketDataError, getBars, type ChartRange } from "@/lib/market-data/alpaca";
+import { LIMITS, overLimit } from "@/lib/rate-limit";
 import { isAssetType, normalizeSymbol } from "@/lib/symbols";
 import { getSessionUser } from "@/lib/supabase/session";
 
 export async function GET(request: Request) {
   const user = await getSessionUser();
   if (!user) return NextResponse.json({ error: "Your session expired. Sign in again." }, { status: 401 });
+  if (overLimit(LIMITS.marketData, user.id)) {
+    return NextResponse.json({ error: "Too many requests. Slow down and try again." }, { status: 429 });
+  }
 
   const url = new URL(request.url);
   const symbol = normalizeSymbol(url.searchParams.get("symbol") ?? "");

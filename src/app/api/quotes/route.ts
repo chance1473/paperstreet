@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { MarketDataError, getQuotes } from "@/lib/market-data/alpaca";
+import { LIMITS, overLimit } from "@/lib/rate-limit";
 import { isAssetType } from "@/lib/symbols";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,6 +10,9 @@ export async function POST(request: Request) {
   const { data, error: sessionError } = await supabase.auth.getUser();
   if (sessionError || !data.user) {
     return NextResponse.json({ error: "Your session expired. Sign in again." }, { status: 401 });
+  }
+  if (overLimit(LIMITS.marketData, data.user.id)) {
+    return NextResponse.json({ error: "Too many requests. Slow down and try again." }, { status: 429 });
   }
 
   let payload: unknown;

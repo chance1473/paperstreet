@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { LIMITS, overLimit } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/supabase/session";
@@ -36,6 +37,10 @@ export async function updatePassword(input: unknown): Promise<{ ok: boolean; mes
   const user = await getSessionUser();
   if (!user) return { ok: false, message: "Your session expired. Sign in again." };
 
+  if (overLimit(LIMITS.password, user.id)) {
+    return { ok: false, message: "Too many password attempts. Wait a few minutes and try again." };
+  }
+
   const record = typeof input === "object" && input ? (input as Record<string, unknown>) : {};
   const password = passwordSchema.safeParse(record.password);
   if (!password.success) {
@@ -63,6 +68,9 @@ export async function updatePassword(input: unknown): Promise<{ ok: boolean; mes
 export async function resetPaperAccount(): Promise<{ ok: boolean; message: string }> {
   const user = await getSessionUser();
   if (!user) return { ok: false, message: "Your session expired. Sign in again." };
+  if (overLimit(LIMITS.reset, user.id)) {
+    return { ok: false, message: "Too many resets. Wait a few minutes and try again." };
+  }
 
   const admin = createAdminClient();
   if (!admin) {

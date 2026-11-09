@@ -18,7 +18,7 @@ test("the confirmation callback exchanges the code and stays on this app", () =>
 });
 
 test("sign-in opens the dashboard and the shell can sign out", () => {
-  assert.match(login, /signInWithPassword/);
+  assert.match(login, /await signIn\(/);
   assert.match(login, /nextPath\.startsWith\("\/"\) \? nextPath : "\/dashboard"/);
   assert.match(shell, /action=\{signOut\}/);
   assert.match(shell, /Log out/);
