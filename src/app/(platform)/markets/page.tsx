@@ -1,5 +1,7 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { LiveQuotes } from "@/components/market/live-quotes";
+import { MarketDataWarning } from "@/components/market/market-data-warning";
+import { WatchlistCard } from "@/components/market/watchlist-card";
 import { QuoteTable } from "@/components/market/quote-table";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -59,11 +61,7 @@ export default async function MarketsPage({
             <Input name="q" defaultValue={query} placeholder="Search symbol or company" aria-label="Search assets" />
           </form>
         </PageHeader>
-        {marketError ? (
-          <p className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-            {marketError}
-          </p>
-        ) : null}
+        <MarketDataWarning message={marketError} />
         {query ? (
           <Card>
             <CardHeader>
@@ -107,19 +105,7 @@ export default async function MarketsPage({
             <QuoteTable rows={movers.losers} empty="Mover data is unavailable." />
           </Card>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Your watchlist</CardTitle>
-          </CardHeader>
-          <QuoteTable
-            rows={watchlist.map((item) => ({
-              symbol: item.symbol,
-              name: item.assetName,
-              assetType: item.assetType,
-            }))}
-            empty="Nothing saved yet."
-          />
-        </Card>
+        <WatchlistCard title="Your watchlist" items={watchlist} empty="Nothing saved yet." />
       </div>
     </LiveQuotes>
   );

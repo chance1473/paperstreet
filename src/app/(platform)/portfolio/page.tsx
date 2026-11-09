@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { LiveQuotes } from "@/components/market/live-quotes";
+import { MarketDataWarning } from "@/components/market/market-data-warning";
 import { HoldingsTable } from "@/components/portfolio/holdings-table";
 import { AccountStats } from "@/components/account/account-stats";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,11 +44,7 @@ export default async function PortfolioPage() {
     >
       <div className="space-y-6">
         <PageHeader title="Portfolio" description="Open positions marked at the latest price." />
-        {marketError ? (
-          <p className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-            {marketError}
-          </p>
-        ) : null}
+        <MarketDataWarning message={marketError} />
         <AccountStats
           cashCents={summary.cashCents}
           positions={summary.positions}
