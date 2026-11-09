@@ -14,3 +14,11 @@ test("a deliberate journey error is stored without secrets", async () => {
   assert.match(stored, /password=\[redacted\]/);
   assert.doesNotMatch(stored, /hunter2/);
 });
+
+test("redaction removes bearer values and quoted credentials", async () => {
+  const { redact } = await import("../src/lib/errors.ts");
+  const message =
+    'Authorization: Bearer opaque-token {"password":"quoted secret","api_key":"key with \\"quote\\""}';
+  const redacted = redact(message);
+  assert.equal(redacted, 'Authorization=[redacted] {"password"=[redacted],"api_key"=[redacted]}');
+});

@@ -1,7 +1,8 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 
-const SECRET = /(password|token|secret|api[_-]?key|authorization)\s*[:=]\s*\S+/gi;
+const SECRET =
+  /(["']?(?:password|token|secret|api[_-]?key|authorization)["']?)\s*[:=]\s*(?:"(?:\\.|[^"\\])*(?:"|$)|'(?:\\.|[^'\\])*(?:'|$)|(?:bearer|basic)\s+[^\s,;]+|[^\s,;]+)/gi;
 
 export function redact(value: string) {
   return value.replace(SECRET, "$1=[redacted]");
