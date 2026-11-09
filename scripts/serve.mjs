@@ -30,6 +30,19 @@ function sendFallback(res) {
   res.end(fallback);
 }
 
+function upstreamHeaders(req) {
+  // The public listener knows the peer address. Replace values supplied by the client.
+  const address = req.socket.remoteAddress || "local";
+  const host = req.headers.host || `127.0.0.1:${port}`;
+  return {
+    ...req.headers,
+    host,
+    "x-forwarded-host": host,
+    "x-forwarded-for": address,
+    "x-real-ip": address,
+  };
+}
+
 const server = http.createServer((req, res) => {
   if (!nextReady) {
     sendFallback(res);
@@ -42,7 +55,7 @@ const server = http.createServer((req, res) => {
       port: internalPort,
       path: req.url,
       method: req.method,
-      headers: { ...req.headers, host: `127.0.0.1:${internalPort}` },
+      headers: upstreamHeaders(req),
     },
     (upstream) => {
       const headers = { ...upstream.headers };
@@ -66,7 +79,7 @@ server.on("upgrade", (req, socket, head) => {
     port: internalPort,
     path: req.url,
     method: req.method,
-    headers: { ...req.headers, host: `127.0.0.1:${internalPort}` },
+    headers: upstreamHeaders(req),
   });
   proxy.on("upgrade", (upstream, upstreamSocket, upstreamHead) => {
     const headerLines = Object.entries(upstream.headers).flatMap(([key, value]) => {

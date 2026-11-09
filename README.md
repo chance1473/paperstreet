@@ -161,6 +161,8 @@ Deploy on Vercel (or any Node host that runs Next.js):
 3. Run the SQL migration against the production database before inviting users.
 4. Build with `npm run build`.
 
+The Node entry point uses the address of the connecting peer for anonymous rate limits. Behind a reverse proxy, traffic from that proxy shares the same limit. Authenticated actions use the signed-in user ID.
+
 ## What this app will not do
 
 - It will not submit orders to Alpaca or any other broker.
