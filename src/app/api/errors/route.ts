@@ -1,27 +1,16 @@
 import { NextResponse } from "next/server";
 
 import { recordJourneyError } from "@/lib/errors";
+import { LIMITS, clientAddress, overLimit } from "@/lib/rate-limit";
 
 // This endpoint is deliberately anonymous: sign-in failures happen before there
 // is a session. It is bounded instead: small bodies, short messages, and a
 // per-client rate limit, so it cannot be used to fill the disk.
-const attempts = new Map<string, { count: number; resetAt: number }>();
-const WINDOW_MS = 60_000;
-const MAX_PER_WINDOW = 20;
 const MAX_BODY_BYTES = 2_000;
 const MAX_MESSAGE_CHARS = 300;
 
 function limited(request: Request) {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const key = forwarded || request.headers.get("x-real-ip") || "local";
-  const now = Date.now();
-  const current = attempts.get(key);
-  if (!current || current.resetAt <= now) {
-    attempts.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  current.count += 1;
-  return current.count > MAX_PER_WINDOW;
+  return overLimit(LIMITS.errorReport, clientAddress(request.headers));
 }
 
 export async function POST(request: Request) {

@@ -44,3 +44,11 @@ test("every costly action checks its limit before doing work", () => {
     assert.ok(text.indexOf("overLimit(LIMITS.marketData") < text.search(/getQuotes\(|getBars\(/));
   }
 });
+
+test("the error and confirmation routes use the shared limiter", () => {
+  for (const route of ["src/app/api/errors/route.ts", "src/app/auth/callback/route.ts"]) {
+    const text = read(route);
+    assert.match(text, /from "@\/lib\/rate-limit"/);
+    assert.doesNotMatch(text, /new Map</);
+  }
+});

@@ -14,6 +14,8 @@ export const LIMITS = {
   order: { name: "order", max: 30, windowMs: 60_000 },
   reset: { name: "account-reset", max: 3, windowMs: 10 * 60_000 },
   password: { name: "password-change", max: 5, windowMs: 10 * 60_000 },
+  errorReport: { name: "error-report", max: 20, windowMs: 60_000 },
+  confirm: { name: "email-confirm", max: 8, windowMs: 60_000 },
   marketData: { name: "market-data", max: 120, windowMs: 60_000 },
 } as const satisfies Record<string, Limit>;
 
