@@ -13,12 +13,19 @@ test("the auth callback refuses an off-site next target before any session work"
   assert.match(route, /!next\.includes\("\\\\"\)/);
 });
 
-test("the anonymous error endpoint is bounded", () => {
+test("anonymous error reports use a shared quota and a fixed log message", () => {
   const route = read("src/app/api/errors/route.ts");
+  assert.match(route, /max: 20, windowMs: 60_000/);
   assert.match(route, /status: 429/);
-  assert.match(route, /status: 413/);
-  assert.match(route, /MAX_MESSAGE_CHARS/);
-  assert.ok(route.indexOf("limited(request)") < route.indexOf("recordJourneyError("));
+  assert.match(route, /status: 403/);
+  const limit = route.indexOf('overLimit(browserReports, "all")');
+  const log = route.indexOf('recordJourneyError("page", new Error("Page render failed"))');
+  assert.ok(limit >= 0 && log > limit);
+  assert.doesNotMatch(route, /request\.(json|text|body)\b/);
+
+  const proxy = read("src/proxy.ts");
+  const publicReport = proxy.indexOf('request.method === "POST" && request.nextUrl.pathname === "/api/errors"');
+  assert.ok(publicReport >= 0 && publicReport < proxy.indexOf("supabase.auth.getUser()"));
 });
 
 test("the callback only redirects to known pages on this app", () => {
