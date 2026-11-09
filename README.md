@@ -4,7 +4,7 @@ A paper brokerage for US stocks and cryptocurrency. Live prices come from Alpaca
 
 **Paper trading only — no real money.**
 
-Sign-in failures, order failures, and page render errors are appended to `logs/journey-errors.log`. Passwords, tokens, and keys are redacted. The directory is not committed.
+Sign-in, sign-up, order and market-data failures, and page render errors are appended to `logs/journey-errors.log`. Passwords, tokens, and keys are redacted. The directory is not committed. Run `npm run errors` to print the most recent entries (`npm run errors -- 50` for more).
 
 ## Stack
 

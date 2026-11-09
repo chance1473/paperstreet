@@ -7,7 +7,7 @@ export function redact(value: string) {
   return value.replace(SECRET, "$1=[redacted]");
 }
 
-export function recordJourneyError(source: "sign-in" | "order" | "page", error: unknown) {
+export function recordJourneyError(source: "sign-in" | "sign-up" | "order" | "page" | "market-data", error: unknown) {
   const message = redact(error instanceof Error ? error.message : String(error));
   const line = JSON.stringify({
     at: new Date().toISOString(),

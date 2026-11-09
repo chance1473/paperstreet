@@ -54,6 +54,9 @@ export async function signUp(input: {
       },
     },
   });
-  if (error) return { ok: false, message: error.message || "Account could not be created." };
+  if (error) {
+    recordJourneyError("sign-up", new Error("Sign-up failed"));
+    return { ok: false, message: error.message || "Account could not be created." };
+  }
   return { ok: true, confirmed: Boolean(data.session) };
 }
