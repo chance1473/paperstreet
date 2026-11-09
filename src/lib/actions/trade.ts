@@ -15,6 +15,7 @@ import {
   valueCents,
 } from "@/lib/money";
 import { buildSummary, getPaperAccount, getPositions, recordSnapshot } from "@/lib/portfolio";
+import { LIMITS, overLimit } from "@/lib/rate-limit";
 import { normalizeSymbol } from "@/lib/symbols";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/supabase/session";
@@ -49,6 +50,9 @@ export async function placeOrder(input: unknown): Promise<{ ok: true; message: s
 
   const user = await getSessionUser();
   if (!user) return { ok: false, message: TRADE_MESSAGES.UNAUTHENTICATED };
+  if (overLimit(LIMITS.order, user.id)) {
+    return { ok: false, message: "Too many orders in a row. Wait a minute and try again." };
+  }
 
   const admin = createAdminClient();
   if (!admin) {

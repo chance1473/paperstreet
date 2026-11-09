@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/client";
+import { signIn, signUp } from "@/lib/actions/auth";
 
 export function LoginForm({ nextPath }: { nextPath: string }) {
   const router = useRouter();
@@ -17,19 +17,13 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
   async function submit(formData: FormData) {
     setPending(true);
     setError(null);
-    const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const result = await signIn({
       email: String(formData.get("email") ?? ""),
       password: String(formData.get("password") ?? ""),
     });
     setPending(false);
-    if (signInError) {
-      void fetch("/api/errors", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ source: "sign-in", message: "Sign-in failed" }),
-      });
-      setError("Email or password is incorrect.");
+    if (!result.ok) {
+      setError(result.message);
       return;
     }
     router.push(nextPath.startsWith("/") ? nextPath : "/dashboard");
@@ -64,25 +58,18 @@ export function SignupForm() {
     setPending(true);
     setError(null);
     setNotice(null);
-    const origin = window.location.origin;
-    const supabase = createClient();
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    const result = await signUp({
       email: String(formData.get("email") ?? ""),
       password: String(formData.get("password") ?? ""),
-      options: {
-        emailRedirectTo: `${origin}/auth/callback`,
-        data: {
-          username: String(formData.get("username") ?? "").toLowerCase(),
-          display_name: String(formData.get("displayName") ?? ""),
-        },
-      },
+      username: String(formData.get("username") ?? ""),
+      displayName: String(formData.get("displayName") ?? ""),
     });
     setPending(false);
-    if (signUpError) {
-      setError(signUpError.message || "Account could not be created.");
+    if (!result.ok) {
+      setError(result.message);
       return;
     }
-    if (!data.session) {
+    if (!result.confirmed) {
       setNotice("Check your email to confirm the account, then log in. Your $100,000 paper account is created with the user.");
       return;
     }
