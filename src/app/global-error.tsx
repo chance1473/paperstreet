@@ -1,23 +1,21 @@
 "use client";
 
+import { useReportPageError } from "@/components/errors/use-report-page-error";
+
 export default function GlobalError({
   error,
-  reset,
+  retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }) {
-  void fetch("/api/errors", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ source: "page", message: error.message }),
-  });
+  useReportPageError(error);
 
   return (
     <html lang="en">
       <body>
-        <p>This page hit an error. The details were saved for the owner.</p>
-        <button type="button" onClick={() => reset()}>
+        <p>This page could not be loaded.</p>
+        <button type="button" onClick={retry}>
           Try again
         </button>
       </body>
