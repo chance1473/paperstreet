@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -56,11 +56,11 @@ export async function GET(request: Request) {
   const requested = url.searchParams.get("next") ?? "/dashboard";
   const next = appPath(requested);
   if (next !== requested) {
-    return NextResponse.redirect(new URL("/login?error=auth", url.origin));
+    redirect("/login?error=auth");
   }
 
   if (code && tooManyAttempts(request)) {
-    return new NextResponse("Too many confirmation attempts. Wait a minute and try again.", {
+    return new Response("Too many confirmation attempts. Wait a minute and try again.", {
       status: 429,
     });
   }
@@ -69,9 +69,9 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(new URL(destination(next), url.origin));
+      redirect(destination(next));
     }
   }
 
-  return NextResponse.redirect(new URL("/login?error=auth", url.origin));
+  redirect("/login?error=auth");
 }
