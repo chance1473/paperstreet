@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { LiveQuotes } from "@/components/market/live-quotes";
-import { QuoteTable } from "@/components/market/quote-table";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { MarketDataWarning } from "@/components/market/market-data-warning";
+import { WatchlistCard } from "@/components/market/watchlist-card";
 import { MarketDataError, getQuotes } from "@/lib/market-data/alpaca";
 import { getWatchlist } from "@/lib/portfolio";
 import { getSessionUser } from "@/lib/supabase/session";
@@ -34,24 +34,8 @@ export default async function WatchlistPage() {
     <LiveQuotes initial={quotes} assets={watchlist}>
       <div className="space-y-6">
         <PageHeader title="Watchlist" description="Saved symbols stay with your account." />
-        {marketError ? (
-          <p className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-            {marketError}
-          </p>
-        ) : null}
-        <Card>
-          <CardHeader>
-            <CardTitle>Saved assets</CardTitle>
-          </CardHeader>
-          <QuoteTable
-            rows={watchlist.map((item) => ({
-              symbol: item.symbol,
-              name: item.assetName,
-              assetType: item.assetType,
-            }))}
-            empty="Add an asset from its page to watch it."
-          />
-        </Card>
+        <MarketDataWarning message={marketError} />
+        <WatchlistCard title="Saved assets" items={watchlist} empty="Add an asset from its page to watch it." />
       </div>
     </LiveQuotes>
   );

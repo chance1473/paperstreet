@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+import { ChartRangePicker, type ChartRange } from "@/components/charts/chart-range-picker";
 import { FinancialChart } from "@/components/charts/financial-chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { AssetType } from "@/lib/money";
 import type { ChartBar } from "@/lib/types";
 
-const RANGES = ["1D", "1W", "1M", "3M", "1Y", "ALL"] as const;
-
 export function PriceChartPanel({ symbol, assetType }: { symbol: string; assetType: AssetType }) {
-  const [range, setRange] = useState<(typeof RANGES)[number]>("1D");
+  const [range, setRange] = useState<ChartRange>("1D");
   const requestKey = `${symbol}:${assetType}:${range}`;
   const [result, setResult] = useState<{ key: string; bars: ChartBar[]; error: boolean } | null>(null);
 
@@ -39,20 +38,7 @@ export function PriceChartPanel({ symbol, assetType }: { symbol: string; assetTy
 
   return (
     <div>
-      <div className="mb-3 flex flex-wrap gap-1">
-        {RANGES.map((item) => (
-          <button
-            key={item}
-            type="button"
-            onClick={() => setRange(item)}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium ${
-              item === range ? "bg-white/10 text-foreground" : "text-muted-foreground hover:bg-white/5"
-            }`}
-          >
-            {item}
-          </button>
-        ))}
-      </div>
+      <ChartRangePicker range={range} onChange={setRange} />
       {status === "loading" ? <Skeleton className="h-[360px] w-full" /> : null}
       {status === "error" ? (
         <div className="flex h-[360px] items-center justify-center text-sm text-muted-foreground">
