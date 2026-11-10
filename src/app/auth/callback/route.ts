@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -50,28 +50,37 @@ function appPath(next: string) {
   return "/dashboard";
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const requested = url.searchParams.get("next") ?? "/dashboard";
   const next = appPath(requested);
-  if (next !== requested) {
-    return NextResponse.redirect(new URL("/login?error=auth", url.origin));
-  }
+  const response = new NextResponse(null, {
+    status: 307,
+    headers: { Location: "/login?error=auth", "Cache-Control": "private, no-store" },
+  });
+  if (next !== requested) return response;
 
   if (code && tooManyAttempts(request)) {
-    return new NextResponse("Too many confirmation attempts. Wait a minute and try again.", {
+    return new Response("Too many confirmation attempts. Wait a minute and try again.", {
       status: 429,
     });
   }
 
   if (code) {
-    const supabase = await createClient();
+    const supabase = await createClient({
+      getAll: () => request.cookies.getAll(),
+      setAll(cookiesToSet) {
+        for (const { name, value, options } of cookiesToSet) {
+          response.cookies.set(name, value, options);
+        }
+      },
+    });
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(new URL(destination(next), url.origin));
+      response.headers.set("Location", destination(next));
     }
   }
 
-  return NextResponse.redirect(new URL("/login?error=auth", url.origin));
+  return response;
 }
