@@ -9,6 +9,11 @@ function isPublic(pathname: string) {
 }
 
 export async function proxy(request: NextRequest) {
+  // A root error can occur before sign-in or when auth itself is unavailable.
+  if (request.method === "POST" && request.nextUrl.pathname === "/api/errors") {
+    return NextResponse.next();
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) {
