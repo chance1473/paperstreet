@@ -38,9 +38,26 @@ test("every costly action checks its limit before doing work", () => {
   const settings = read("src/lib/actions/settings.ts");
   assert.ok(settings.indexOf("overLimit(LIMITS.password") < settings.indexOf("signInWithPassword"));
   assert.ok(settings.indexOf("overLimit(LIMITS.reset") < settings.indexOf("reset_paper_account"));
-  for (const route of ["src/app/api/quotes/route.ts", "src/app/api/bars/route.ts"]) {
-    const text = read(route);
-    assert.match(text, /status: 429/);
-    assert.ok(text.indexOf("overLimit(LIMITS.marketData") < text.search(/getQuotes\(|getBars\(/));
+});
+
+test("quotes and bars share a per-user limit and refuse before fetching market data", () => {
+  for (const [route, subject, provider] of [
+    ["quotes", "data.user.id", "getQuotes"],
+    ["bars", "user.id", "getBars"],
+  ]) {
+    const text = read(`src/app/api/${route}/route.ts`);
+    const guard = text.indexOf(`overLimit(LIMITS.marketData, ${subject})`);
+    const refusal = text.indexOf("status: 429", guard);
+    const fetch = text.indexOf(`${provider}(`);
+    assert.ok(guard >= 0 && refusal > guard && fetch > refusal, route);
   }
+
+  resetLimits();
+  const now = 1_000_000;
+  for (let request = 0; request < 120; request += 1) {
+    assert.equal(overLimit(LIMITS.marketData, "account-one", now), false);
+  }
+  assert.equal(overLimit(LIMITS.marketData, "account-one", now), true);
+  assert.equal(overLimit(LIMITS.marketData, "account-two", now), false);
+  assert.equal(overLimit(LIMITS.marketData, "account-one", now + 60_000), false);
 });
