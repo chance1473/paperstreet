@@ -170,3 +170,20 @@ The Node entry point uses the address of the connecting peer for anonymous rate 
 - It will not submit orders to Alpaca or any other broker.
 - It will not accept deposits, withdrawals, or real currency.
 - It will not show a portfolio chart for periods that have no stored snapshots.
+
+## Verify the paper-trading journey
+
+Run PaperStreet against a disposable local Supabase project with the repository
+migrations applied and email confirmation disabled. The browser check creates a
+test account and records two simulated trades in that database. It needs a
+working quote source for AAPL. Install Chromium if it is missing and point the
+check at your local app.
+
+```bash
+PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
+PAPERSTREET_E2E_LOCAL_URL=http://localhost:3000 npm run test:e2e -- e2e/paper-trading.spec.ts
+```
+
+The check starts from the public landing page and verifies that a new account
+opens with $100,000 in virtual cash. It buys one share, reloads the transaction
+ledger, and sells the share. The ledger must show exactly one buy and one sell.
