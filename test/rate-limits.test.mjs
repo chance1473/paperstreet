@@ -24,6 +24,16 @@ test("limits are separate per action", () => {
   assert.equal(overLimit(LIMITS.order, "u1", 5), false);
 });
 
+test("confirmation keeps its own limit of eight attempts per minute", () => {
+  resetLimits();
+  const subject = "1.2.3.4";
+  for (let i = 0; i < 8; i += 1) {
+    assert.equal(overLimit(LIMITS.confirmation, subject, 0), false);
+  }
+  assert.equal(overLimit(LIMITS.confirmation, subject, 0), true);
+  assert.equal(overLimit(LIMITS.signIn, subject, 0), false);
+  assert.equal(overLimit(LIMITS.confirmation, subject, 60_000), false);
+});
 for (const [action, limit, allowed, windowMs] of [
   ["order", LIMITS.order, 30, 60_000],
   ["reset", LIMITS.reset, 3, 600_000],
