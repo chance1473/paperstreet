@@ -10,6 +10,7 @@ export type Limit = { name: string; max: number; windowMs: number };
 
 export const LIMITS = {
   signIn: { name: "sign-in", max: 8, windowMs: 60_000 },
+  confirmation: { name: "email-confirm", max: 8, windowMs: 60_000 },
   signUp: { name: "sign-up", max: 5, windowMs: 10 * 60_000 },
   order: { name: "order", max: 30, windowMs: 60_000 },
   reset: { name: "account-reset", max: 3, windowMs: 10 * 60_000 },
