@@ -24,6 +24,24 @@ test("limits are separate per action", () => {
   assert.equal(overLimit(LIMITS.order, "u1", 5), false);
 });
 
+for (const [action, limit, allowed, windowMs] of [
+  ["order", LIMITS.order, 30, 60_000],
+  ["reset", LIMITS.reset, 3, 600_000],
+  ["password", LIMITS.password, 5, 600_000],
+]) {
+  test(`${action} refuses excess attempts per account until its window resets`, () => {
+    resetLimits();
+    const now = 1_000_000;
+    for (let attempt = 0; attempt < allowed; attempt += 1) {
+      assert.equal(overLimit(limit, "account-one", now), false);
+    }
+    assert.equal(overLimit(limit, "account-one", now), true);
+    assert.equal(overLimit(limit, "account-two", now), false);
+    assert.equal(overLimit(limit, "account-one", now + windowMs - 1), true);
+    assert.equal(overLimit(limit, "account-one", now + windowMs), false);
+  });
+}
+
 test("sign-in and sign-up run on the server behind a limit", () => {
   const actions = read("src/lib/actions/auth.ts");
   assert.ok(actions.indexOf("overLimit(LIMITS.signIn") < actions.indexOf("signInWithPassword"));
