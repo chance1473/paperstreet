@@ -4,7 +4,7 @@ A paper brokerage for US stocks and cryptocurrency. Live prices come from Alpaca
 
 **Paper trading only — no real money.**
 
-Sign-in failures, order failures, and page render errors are appended to `logs/journey-errors.log`. Passwords, tokens, and keys are redacted. The directory is not committed.
+Sign-in, sign-up, order, market-data, and page failures are appended to `logs/journey-errors.log`. Passwords, tokens, and keys are redacted. The directory is not committed. Run `npm run errors` to print the latest lines.
 
 To retain these logs across deployments, set `JOURNEY_ERROR_LOG` to a writable path on persistent storage and configure log rotation on the host. PaperStreet does not rotate the file automatically.
 
