@@ -37,6 +37,7 @@ export const orderSchema = z.object({
   side: z.enum(["buy", "sell"]),
   mode: z.enum(["quantity", "notional"]),
   amount: z.string().trim().min(1).max(24),
+  requestId: z.string().trim().regex(/^[A-Za-z0-9-]{8,80}$/).optional(),
 });
 
 export const watchlistSchema = z.object({

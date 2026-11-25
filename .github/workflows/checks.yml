@@ -5,6 +5,9 @@ on:
   push:
     branches: [main]
 
+# Runtime: Node.js 22 (LTS, maintained through April 2027). There is no custom
+# container image. GitHub's hosted ubuntu-latest runner is the base image, and
+# actions/setup-node installs Node 22 on it. package.json engines matches this.
 jobs:
   test:
     runs-on: ubuntu-latest

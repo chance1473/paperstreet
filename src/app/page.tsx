@@ -152,6 +152,8 @@ export default function HomePage() {
             <Link href="/limits" className="underline-offset-4 hover:underline">
               What this app does not do
             </Link>
+            <Link href="/privacy" className="underline-offset-4 hover:underline">Privacy</Link>
+            <Link href="/terms" className="underline-offset-4 hover:underline">Terms</Link>
           </span>
         </div>
       </footer>
