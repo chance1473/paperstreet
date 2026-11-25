@@ -175,6 +175,7 @@ for each row execute function public.handle_new_user();
 -- value cents = round(quantity_units * price_micros / 1_000_000_000_000)
 -- ---------------------------------------------------------------------------
 
+-- Service role bypasses row-level security. Every write below filters on p_user_id.
 create or replace function public.execute_paper_trade(
   p_user_id uuid,
   p_symbol text,

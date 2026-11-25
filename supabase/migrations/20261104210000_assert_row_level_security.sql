@@ -4,6 +4,7 @@
 -- and transactions stay server-side (service role); browsers can only read
 -- their own rows, plus the watchlist insert and delete.
 
+-- profiles.id is the owner key. Other customer tables use user_id.
 alter table public.profiles enable row level security;
 
 drop policy if exists "profiles_select_own" on public.profiles;
