@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { ownedProfileImageUrl } from "../src/lib/appearance.ts";
+import { ownedProfileImagePath } from "../src/lib/appearance.ts";
 import { liveBookRank } from "../src/lib/leaderboard-rank.ts";
 import { formatCents, formatSignedCents } from "../src/lib/money.ts";
 
@@ -23,7 +23,8 @@ test("the public leaderboard shows a saved profile image and keeps invested and 
   assert.match(page, /Invested/);
   assert.match(page, /Profit or loss/);
   assert.match(page, /Practice books/);
-  assert.match(page, /ownedProfileImageUrl/);
+  assert.match(page, /signedProfileImageUrl/);
+  assert.doesNotMatch(page, /object\/public/);
   assert.doesNotMatch(page, /email/i);
   assert.doesNotMatch(page, /soundtrack|opening-bell|quiet-tape|after-hours|<audio/i);
   assert.doesNotMatch(page, /execute_paper_trade/);
@@ -33,8 +34,8 @@ test("a signed-in profile image is shown in the app shell", () => {
   assert.match(shell, /avatarUrl/);
   assert.match(shell, /<img/);
   assert.match(shell, /Profile picture/);
-  assert.match(layout, /ownedProfileImageUrl\(user\.id, profile\?\.avatarPath\)/);
-  assert.match(layout, /avatarUrl=\{ownedProfileImageUrl/);
+  assert.match(layout, /signedProfileImageUrl\(profile\?\.avatarPath\)/);
+  assert.match(layout, /avatarUrl=\{await signedProfileImageUrl/);
   assert.doesNotMatch(shell, /soundtrack|opening-bell|quiet-tape|after-hours|profile-images/);
   assert.doesNotMatch(shell, /email/i);
 });
@@ -43,13 +44,10 @@ test("image paths stay under the owner id in the profile-images bucket", () => {
   const previous = process.env.NEXT_PUBLIC_SUPABASE_URL;
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co/";
   try {
-    assert.equal(
-      ownedProfileImageUrl(userId, `${userId}/avatar`),
-      `https://example.supabase.co/storage/v1/object/public/profile-images/${userId}/avatar`,
-    );
-    assert.equal(ownedProfileImageUrl(userId, `${userId}/../secret`), null);
-    assert.equal(ownedProfileImageUrl(userId, `${otherId}/avatar`), null);
-    assert.equal(ownedProfileImageUrl(userId, null), null);
+    assert.equal(ownedProfileImagePath(userId, `${userId}/avatar`), `${userId}/avatar`);
+    assert.equal(ownedProfileImagePath(userId, `${userId}/../secret`), null);
+    assert.equal(ownedProfileImagePath(userId, `${otherId}/avatar`), null);
+    assert.equal(ownedProfileImagePath(userId, null), null);
   } finally {
     if (previous === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     else process.env.NEXT_PUBLIC_SUPABASE_URL = previous;

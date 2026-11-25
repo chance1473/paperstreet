@@ -53,21 +53,16 @@ export function inspectProfileImage(file: { type: string; size: number; name?: s
   return { ok: true, contentType: type };
 }
 
-export function profileImagePublicUrl(path: string | null | undefined) {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-  if (!base || !path) return null;
+export function acceptedProfileImagePath(path: string | null | undefined) {
+  if (!path) return null;
   if (!/^[A-Za-z0-9._/-]+$/.test(path) || path.split("/").includes("..")) return null;
-  const encoded = path
-    .split("/")
-    .map((part) => encodeURIComponent(part))
-    .join("/");
-  return `${base}/storage/v1/object/public/${PROFILE_IMAGE_BUCKET}/${encoded}`;
+  return path;
 }
 
-export function ownedProfileImageUrl(userId: string, path: string | null | undefined) {
+export function ownedProfileImagePath(userId: string, path: string | null | undefined) {
   if (!/^[0-9a-f-]{8,}$/i.test(userId) || !path) return null;
   if (path.split("/").includes("..") || !path.startsWith(`${userId}/`)) return null;
-  return profileImagePublicUrl(path);
+  return acceptedProfileImagePath(path);
 }
 
 export function soundtrackSrc(choice: string | null | undefined) {
@@ -83,13 +78,10 @@ export type DeskSurface = {
   };
 };
 
-export function deskSurface(choice: string | null | undefined): DeskSurface {
+export function deskSurface(choice: string | null | undefined, imageUrl?: string | null): DeskSurface {
   if (choice === "ledger") return { className: "desk-ledger" };
   if (choice === "dusk") return { className: "desk-dusk" };
-  if (choice && !isBuiltInBackground(choice)) {
-    const url = profileImagePublicUrl(choice);
-    if (url) return imageSurface(url);
-  }
+  if (choice && !isBuiltInBackground(choice) && imageUrl) return imageSurface(imageUrl);
   return { className: "desk-ink" };
 }
 

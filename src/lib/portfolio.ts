@@ -1,6 +1,6 @@
 import "server-only";
 
-import { ownedProfileImageUrl } from "@/lib/appearance";
+import { signedProfileImageUrl } from "@/lib/profile-image-url";
 import { liveBookRank } from "@/lib/leaderboard-rank";
 import { getQuotes } from "@/lib/market-data/alpaca";
 import { STARTING_CASH_CENTS, asBigInt, percentFromCents, valueCents, type AssetType } from "@/lib/money";
@@ -276,7 +276,7 @@ function rankBooks(
       investedCents: ranked.investedCents.toString(),
       profitCents: ranked.profitCents.toString(),
       returnPercent: percentFromCents(ranked.profitCents, STARTING_CASH_CENTS) ?? 0,
-      avatarUrl: ownedProfileImageUrl(account.user_id, profile.avatar_path ? String(profile.avatar_path) : null),
+      avatarUrl: null,
     });
   }
 
@@ -325,14 +325,26 @@ export async function getLeaderboard(): Promise<{ live: LeaderboardEntry[]; prac
     );
   }
 
+  const live = rankBooks("live", (accounts ?? []) as CashAccount[], profileRows, groupHoldings(liveRows), quoteMap);
+  const practice = rankBooks(
+    "practice",
+    (simulatedAccounts ?? []) as CashAccount[],
+    profileRows,
+    groupHoldings(practiceRows),
+    quoteMap,
+  );
   return {
-    live: rankBooks("live", (accounts ?? []) as CashAccount[], profileRows, groupHoldings(liveRows), quoteMap),
-    practice: rankBooks(
-      "practice",
-      (simulatedAccounts ?? []) as CashAccount[],
-      profileRows,
-      groupHoldings(practiceRows),
-      quoteMap,
-    ),
+    live: await signAvatars(live, profileRows),
+    practice: await signAvatars(practice, profileRows),
   };
+}
+
+async function signAvatars(entries: LeaderboardEntry[], profiles: BoardProfile[]) {
+  return Promise.all(
+    entries.map(async (entry) => {
+      const profile = profiles.find((row) => String(row.username) === entry.username);
+      const path = profile?.avatar_path ? String(profile.avatar_path) : null;
+      return { ...entry, avatarUrl: await signedProfileImageUrl(path) };
+    }),
+  );
 }

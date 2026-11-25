@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { ownedProfileImageUrl } from "@/lib/appearance";
+import { signedProfileImageUrl } from "@/lib/profile-image-url";
 import { asBigInt, centsTone, formatCents, formatPercent, formatSignedCents } from "@/lib/money";
 import { getLeaderboard, getProfile } from "@/lib/portfolio";
 import { getSessionUser } from "@/lib/supabase/session";
@@ -52,7 +52,7 @@ export default async function LeaderboardPage() {
 
   if (user) {
     return (
-      <AppShell displayName={profile?.displayName ?? "Trader"} avatarUrl={ownedProfileImageUrl(user.id, profile?.avatarPath)}>
+      <AppShell displayName={profile?.displayName ?? "Trader"} avatarUrl={await signedProfileImageUrl(profile?.avatarPath)}>
         {content}
       </AppShell>
     );
