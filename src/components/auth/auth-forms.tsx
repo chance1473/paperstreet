@@ -48,7 +48,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
   );
 }
 
-export function SignupForm() {
+export function SignupForm({ challenge }: { challenge: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -63,6 +63,8 @@ export function SignupForm() {
       password: String(formData.get("password") ?? ""),
       username: String(formData.get("username") ?? ""),
       displayName: String(formData.get("displayName") ?? ""),
+      challenge: String(formData.get("challenge") ?? ""),
+      website: String(formData.get("website") ?? ""),
     });
     setPending(false);
     if (!result.ok) {
@@ -79,6 +81,11 @@ export function SignupForm() {
 
   return (
     <form action={submit} className="space-y-4">
+      <input type="hidden" name="challenge" value={challenge} />
+      <div aria-hidden="true" className="absolute h-0 w-0 overflow-hidden">
+        <label htmlFor="website">Website</label>
+        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
       <Field id="displayName" label="Display name" autoComplete="nickname" />
       <Field id="username" label="Username" autoComplete="username" />
       <Field id="email" label="Email" type="email" autoComplete="email" />
