@@ -117,12 +117,17 @@ function markReady() {
   probe.on("error", () => setTimeout(markReady, 300));
 }
 
+const nextHostname =
+  typeof process.env.HOSTNAME === "string" && process.env.HOSTNAME !== ""
+    ? process.env.HOSTNAME
+    : "127.0.0.1";
+
 const child = spawn(
   "npx",
-  ["next", "dev", "--webpack", "--hostname", "127.0.0.1", "--port", String(internalPort)],
+  ["next", "dev", "--webpack", "--hostname", nextHostname, "--port", String(internalPort)],
   {
     stdio: ["ignore", "inherit", "inherit"],
-    env: { ...process.env, HOSTNAME: "127.0.0.1", PORT: String(internalPort) },
+    env: { ...process.env, HOSTNAME: nextHostname, PORT: String(internalPort) },
   },
 );
 

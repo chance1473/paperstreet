@@ -24,4 +24,6 @@ test("dev and start listen without a production build", () => {
   assert.match(script, /delete headers\["transfer-encoding"\]/);
   assert.match(script, /server\.on\("upgrade"/);
   assert.doesNotMatch(script, /process\.exit/);
+  assert.match(script, /process\.env\.HOSTNAME/);
+  assert.doesNotMatch(script, /supabase\.co/);
 });
