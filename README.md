@@ -16,6 +16,14 @@ To retain these logs across deployments, set `JOURNEY_ERROR_LOG` to a writable p
 - Alpaca Market Data for US stocks and crypto
 - Lightweight Charts
 
+## Sign-in
+
+Supabase Auth stores the password. The app has no password table.
+
+- Email confirmation is off in the local config (`enable_confirmations = false`), so a local sign-up can sign in immediately. A hosted project should turn email confirmation on in the Auth settings.
+- A forgotten password is recovered by Supabase Auth's reset email. The app does not store a reset token of its own.
+- Leaked-password protection is on in the local config (`password_hibp_enabled = true`). A hosted project must turn on the same leaked-password protection in the Auth settings. The app rejects passwords shorter than 8 characters or longer than 72, which is the range Supabase Auth accepts.
+
 ## How money is stored
 
 | Value | Representation |
