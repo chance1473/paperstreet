@@ -1,0 +1,33 @@
+name: Browser error boundaries
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/browser-errors.yml'
+      - 'src/app/global-error.tsx'
+      - 'src/app/(platform)/error.tsx'
+      - 'src/app/api/errors/route.ts'
+      - 'src/components/errors/**'
+      - 'src/lib/errors.ts'
+      - 'test/fixtures/browser-error-probe.mjs'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-errors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node test/fixtures/browser-error-probe.mjs
