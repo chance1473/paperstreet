@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 
 import { recordJourneyError } from "@/lib/errors";
 import { LIMITS, clientAddress, overLimit } from "@/lib/rate-limit";
+import { signupChallengeError } from "@/lib/signup-challenge";
 import { createClient } from "@/lib/supabase/server";
 
 type Result = { ok: true; confirmed: boolean } | { ok: false; message: string };
@@ -37,7 +38,12 @@ export async function signUp(input: {
   password: string;
   username: string;
   displayName: string;
+  challenge?: string;
+  website?: string;
 }): Promise<Result> {
+  const challengeError = signupChallengeError(input);
+  if (challengeError) return { ok: false, message: challengeError };
+
   const requestHeaders = await headers();
   const address = clientAddress(requestHeaders);
   if (overLimit(LIMITS.signUp, address)) return { ok: false, message: TOO_MANY };
