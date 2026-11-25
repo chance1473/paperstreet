@@ -16,6 +16,10 @@ To retain these logs across deployments, set `JOURNEY_ERROR_LOG` to a writable p
 - Alpaca Market Data for US stocks and crypto
 - Lightweight Charts
 
+## Sessions
+
+Supabase Auth sets the access token to 1 hour in `supabase/config.toml` (`jwt_expiry = 3600`). The refresh token can keep the session for 30 days (`[auth.sessions] timebox = "720h"`). Signing out ends the session immediately. Changing the password signs the current session out, so the next request has to sign in again.
+
 ## How money is stored
 
 | Value | Representation |

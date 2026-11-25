@@ -62,7 +62,8 @@ export async function updatePassword(input: unknown): Promise<{ ok: boolean; mes
 
   const { error } = await supabase.auth.updateUser({ password: password.data });
   if (error) return { ok: false, message: "Password could not be updated." };
-  return { ok: true, message: "Password updated." };
+  await supabase.auth.signOut();
+  return { ok: true, message: "Password updated. Sign in again." };
 }
 
 export async function resetPaperAccount(): Promise<{ ok: boolean; message: string }> {
