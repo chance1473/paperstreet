@@ -28,6 +28,17 @@ test("a deliberate journey error is stored with its source and without secrets",
   assert.doesNotMatch(stored, /plain-fixture|json-fixture|bearer-fixture/);
 });
 
+test("quotes, bars, and sign-up record failures the owner can print", () => {
+  for (const file of ["src/app/api/quotes/route.ts", "src/app/api/bars/route.ts"]) {
+    assert.match(readFileSync(file, "utf8"), /recordJourneyError\("market-data"/);
+  }
+  assert.match(readFileSync("src/lib/actions/auth.ts", "utf8"), /recordJourneyError\("sign-up"/);
+  assert.match(readFileSync("package.json", "utf8"), /"errors": "node scripts\/show-errors.mjs"/);
+  assert.match(readFileSync("src/app/global-error.tsx", "utf8"), /useReportPageError/);
+  assert.match(readFileSync("src/app/(platform)/error.tsx", "utf8"), /useReportPageError/);
+  assert.match(readFileSync("src/components/errors/use-report-page-error.ts", "utf8"), /\/api\/errors/);
+});
+
 test("redaction removes bearer values and quoted credentials", async () => {
   const { redact } = await import("../src/lib/errors.ts");
   const message =

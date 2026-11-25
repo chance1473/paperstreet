@@ -8,6 +8,7 @@
     "start": "node scripts/serve.mjs",
     "postinstall": "node scripts/ready.mjs",
     "lint": "eslint",
+    "errors": "node scripts/show-errors.mjs",
     "test": "node --experimental-strip-types --test test/*.test.mjs",
     "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test"
   },

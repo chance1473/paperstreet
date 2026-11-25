@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { recordJourneyError } from "@/lib/errors";
 import { MarketDataError, getQuotes } from "@/lib/market-data/alpaca";
 import { LIMITS, overLimit } from "@/lib/rate-limit";
 import { isAssetType } from "@/lib/symbols";
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
     const quotes = await getQuotes(assets);
     return NextResponse.json({ quotes });
   } catch (error) {
+    recordJourneyError("market-data", error);
     const message =
       error instanceof MarketDataError ? error.message : "Market data is temporarily unavailable.";
     return NextResponse.json({ error: message }, { status: 503 });
