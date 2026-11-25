@@ -57,7 +57,8 @@ cp .env.example .env.local
 
 | Variable | Where |
 | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Browser and server |
+| `SUPABASE_POOLER_URL` | Server only. Read first by the server and admin clients. This is the pooler endpoint. |
+| `NEXT_PUBLIC_SUPABASE_URL` | Browser. Also the server fallback when `SUPABASE_POOLER_URL` is unset. |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser and server |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server only. Trades, reset, snapshots, leaderboard. |
 | `ALPACA_API_KEY` | Server only |
