@@ -36,7 +36,7 @@ export async function addToWatchlist(input: unknown): Promise<{ ok: boolean; mes
   });
 
   if (error) {
-    if (error.code === "23505") return { ok: false, message: "That asset is already on your watchlist." };
+    if (error.code === "23505") return { ok: true, message: "That asset is already on your watchlist." };
     return { ok: false, message: "The watchlist could not be updated." };
   }
 
