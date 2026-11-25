@@ -2,6 +2,7 @@
   "name": "paperstreet",
   "version": "0.1.0",
   "private": true,
+  "description": "Paper trading. The test plan is docs/test-plan.md.",
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "build": "next build",
