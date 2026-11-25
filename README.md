@@ -154,6 +154,13 @@ npm start
 
 Portfolio charts only plot saved snapshots. Snapshots are written when the account opens, after each trade, and at most every 15 minutes when the dashboard can price the book. The app does not invent history for dates before those snapshots exist.
 
+## When something fails
+
+- A market-data failure shows the provider's message, or "Market data is temporarily unavailable." The order is not filled. The same failure is written to the redacted journey log.
+- The order page and the root page each offer Try again. That button reloads the page. It does not submit an order.
+- Repeating a watchlist add hits the unique `(user_id, symbol)` constraint and does not insert a second row.
+- Repeating the same order confirmation within two minutes, including a double submit of one ticket, returns the first result and does not call `execute_paper_trade` again. A new confirmation is a new paper order. A failed trade changes no cash: the database function commits the cash, position, and ledger row together or not at all.
+
 ## Production
 
 Deploy on Vercel (or any Node host that runs Next.js):

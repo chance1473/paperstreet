@@ -15,6 +15,7 @@ import {
   valueCents,
 } from "@/lib/money";
 import { buildSummary, getPaperAccount, getPositions, recordSnapshot } from "@/lib/portfolio";
+import { priorOrder, rememberOrder } from "@/lib/order-retry";
 import { LIMITS, overLimit } from "@/lib/rate-limit";
 import { normalizeSymbol } from "@/lib/symbols";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -63,18 +64,23 @@ export async function placeOrder(input: unknown): Promise<{ ok: true; message: s
   }
 
   const symbol = normalizeSymbol(parsed.data.symbol);
-  const { assetType, side, mode } = parsed.data;
+  const { assetType, side, mode, requestId } = parsed.data;
+  const retryKey = requestId ? `${user.id}:${requestId}` : "";
+  if (retryKey) {
+    const earlier = priorOrder(retryKey);
+    if (earlier) return earlier;
+  }
   if (!symbol) return { ok: false, message: TRADE_MESSAGES.INVALID_SYMBOL };
 
   let quote;
   try {
     quote = await getQuote(symbol, assetType);
   } catch (error) {
+    const { recordJourneyError } = await import("@/lib/errors");
+    recordJourneyError("order", error);
     if (error instanceof MarketDataError) {
       return { ok: false, message: error.message };
     }
-    const { recordJourneyError } = await import("@/lib/errors");
-    recordJourneyError("order", error);
     return { ok: false, message: "A live price could not be retrieved." };
   }
 
@@ -152,5 +158,7 @@ export async function placeOrder(input: unknown): Promise<{ ok: true; message: s
   revalidatePath(`/asset/${assetType}/${symbol}`);
 
   const verb = side === "buy" ? "Bought" : "Sold";
-  return { ok: true, message: `${verb} ${symbol} at the latest market price.` };
+  const result = { ok: true as const, message: `${verb} ${symbol} at the latest market price.` };
+  if (retryKey) rememberOrder(retryKey, result);
+  return result;
 }

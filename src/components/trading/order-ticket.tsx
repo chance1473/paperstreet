@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -76,9 +76,14 @@ export function OrderTicket({
         ? "You do not own enough of this asset to sell."
         : null;
 
+  const requestId = useRef("");
+
   function confirm() {
+    if (!requestId.current) requestId.current = crypto.randomUUID();
+    const id = requestId.current;
     startTransition(async () => {
-      const result = await placeOrder({ symbol, assetType, side, mode, amount });
+      const result = await placeOrder({ symbol, assetType, side, mode, amount, requestId: id });
+      if (result.ok) requestId.current = "";
       if (!result.ok) {
         toast.error(result.message);
         return;
