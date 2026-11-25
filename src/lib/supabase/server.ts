@@ -3,8 +3,10 @@ import "server-only";
 import { createServerClient, type CookieMethodsServer } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+import { serverSupabaseUrl } from "@/lib/supabase/url";
+
 export async function createClient(cookieMethods?: CookieMethodsServer) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = serverSupabaseUrl();
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) {
     throw new Error("Supabase is not configured.");
