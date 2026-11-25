@@ -34,6 +34,9 @@ test("quotes, bars, and sign-up record failures the owner can print", () => {
   }
   assert.match(readFileSync("src/lib/actions/auth.ts", "utf8"), /recordJourneyError\("sign-up"/);
   assert.match(readFileSync("package.json", "utf8"), /"errors": "node scripts\/show-errors.mjs"/);
+  assert.match(readFileSync("src/app/global-error.tsx", "utf8"), /useReportPageError/);
+  assert.match(readFileSync("src/app/(platform)/error.tsx", "utf8"), /useReportPageError/);
+  assert.match(readFileSync("src/components/errors/use-report-page-error.ts", "utf8"), /\/api\/errors/);
 });
 
 test("redaction removes bearer values and quoted credentials", async () => {
