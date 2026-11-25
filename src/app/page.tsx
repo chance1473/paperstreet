@@ -147,7 +147,12 @@ export default function HomePage() {
       <footer className="border-t border-white/8">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>PaperStreet</span>
-          <span>Paper trading only. No real-money deposits or brokerage orders.</span>
+          <span className="flex flex-wrap gap-x-4 gap-y-1">
+            <span>Paper trading only. No real-money deposits or brokerage orders.</span>
+            <Link href="/limits" className="underline-offset-4 hover:underline">
+              What this app does not do
+            </Link>
+          </span>
         </div>
       </footer>
     </main>
