@@ -1,7 +1,8 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppearanceForm, PasswordForm, ProfileForm, ResetAccountButton } from "@/components/settings/settings-forms";
-import { deskSurface } from "@/lib/appearance";
+import { deskSurface, isBuiltInBackground } from "@/lib/appearance";
+import { signedProfileImageUrl } from "@/lib/profile-image-url";
 import { getProfile } from "@/lib/portfolio";
 import { getSessionUser } from "@/lib/supabase/session";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,12 @@ export default async function SettingsPage() {
     ? new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(new Date(profile.createdAt))
     : "—";
 
-  const surface = deskSurface(profile?.backgroundChoice);
+  const backgroundUrl =
+    profile?.backgroundChoice && !isBuiltInBackground(profile.backgroundChoice)
+      ? await signedProfileImageUrl(profile.backgroundChoice)
+      : null;
+  const avatarUrl = await signedProfileImageUrl(profile?.avatarPath);
+  const surface = deskSurface(profile?.backgroundChoice, backgroundUrl);
 
   return (
     <div className={cn("mx-auto max-w-2xl space-y-6 rounded-xl", surface.className)} style={surface.style}>
@@ -54,6 +60,8 @@ export default async function SettingsPage() {
               username={profile.username}
               displayName={profile.displayName}
               avatarPath={profile.avatarPath}
+              avatarUrl={avatarUrl}
+              backgroundUrl={backgroundUrl}
               backgroundChoice={profile.backgroundChoice}
               soundtrackChoice={profile.soundtrackChoice}
             />

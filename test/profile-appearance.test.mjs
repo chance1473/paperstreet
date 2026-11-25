@@ -18,9 +18,11 @@ test("a new migration adds picture, background, and soundtrack columns", () => {
   assert.doesNotMatch(migration, /20260924120000_paperstreet/);
 });
 
-test("only the owner can change image files, and others can view them", () => {
+test("only the owner can read or change image files", () => {
   assert.match(migration, /'profile-images'/);
-  assert.match(migration, /for select to public/);
+  assert.match(migration, /false,/);
+  assert.doesNotMatch(migration, /for select to public/);
+  assert.match(migration, /profile_images_select_own/);
   assert.match(migration, /for insert to authenticated/);
   assert.match(migration, /for update to authenticated/);
   assert.match(migration, /for delete to authenticated/);

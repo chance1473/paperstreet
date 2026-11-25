@@ -6,14 +6,14 @@ import {
   PROFILE_IMAGE_MAX_BYTES,
   deskSurface,
   inspectProfileImage,
-  profileImagePublicUrl,
+  acceptedProfileImagePath,
   profileImageUploadTarget,
   soundtrackSrc,
 } from "../src/lib/appearance.ts";
 
 const userId = "11111111-1111-1111-1111-111111111111";
 
-test("picture and background files use the public profile-images bucket", () => {
+test("picture and background files use the private profile-images bucket", () => {
   assert.deepEqual(profileImageUploadTarget(userId, "avatar"), {
     bucket: "profile-images",
     path: `${userId}/avatar`,
@@ -37,24 +37,17 @@ test("only jpeg, png, and webp images up to 2 MB are accepted", () => {
   assert.equal(inspectProfileImage({ type: "image/png", size: 0 }).ok, false);
 });
 
-test("a saved image path becomes a public profile-images url", () => {
-  const previous = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co/";
-  try {
-    assert.equal(
-      profileImagePublicUrl(`${userId}/avatar`),
-      `https://example.supabase.co/storage/v1/object/public/profile-images/${userId}/avatar`,
-    );
-    assert.equal(profileImagePublicUrl(`${userId}/../secret`), null);
-    assert.equal(profileImagePublicUrl(null), null);
-    assert.equal(deskSurface("ledger").className, "desk-ledger");
-    assert.equal(deskSurface("dusk").className, "desk-dusk");
-    assert.equal(deskSurface(null).className, "desk-ink");
-    assert.match(deskSurface(`${userId}/background`).style?.backgroundImage ?? "", /profile-images/);
-  } finally {
-    if (previous === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    else process.env.NEXT_PUBLIC_SUPABASE_URL = previous;
-  }
+test("a saved image path is not turned into a public storage url", () => {
+  const source = readFileSync(new URL("../src/lib/appearance.ts", import.meta.url), "utf8");
+  assert.equal(acceptedProfileImagePath(`${userId}/avatar`), `${userId}/avatar`);
+  assert.equal(acceptedProfileImagePath(`${userId}/../secret`), null);
+  assert.equal(acceptedProfileImagePath(null), null);
+  assert.doesNotMatch(source, /object\/public/);
+  assert.equal(deskSurface("ledger").className, "desk-ledger");
+  assert.equal(deskSurface("dusk").className, "desk-dusk");
+  assert.equal(deskSurface(null).className, "desk-ink");
+  assert.equal(deskSurface(`${userId}/background`).className, "desk-ink");
+  assert.match(deskSurface(`${userId}/background`, "https://example.supabase.co/object/sign/profile-images/a?token=1").style?.backgroundImage ?? "", /token=1/);
 });
 
 test("the soundtrack list is the three built-in tracks", () => {

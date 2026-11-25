@@ -16,7 +16,7 @@ const NOT_SUPPORTED = [
   "Limit, stop, short, options, or margin orders. A sell can only close shares the paper account already holds.",
   "Investment advice, tax reporting, or a live brokerage account.",
   "A custom domain or email sent from the owner's own domain. Sign-up mail, when it is sent, comes from the database host.",
-  "File sharing. The only uploads are a profile picture and a desk background, and those images are readable by anyone who has the address.",
+  "File sharing. The only uploads are a profile picture and a desk background. Those files stay private and are shown through a short-lived signed link.",
 ];
 
 export default function LimitsPage() {

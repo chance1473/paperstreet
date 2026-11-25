@@ -18,7 +18,7 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values (
   'profile-images',
   'profile-images',
-  true,
+  false,
   2097152,
   array['image/jpeg', 'image/png', 'image/webp']
 )
@@ -27,11 +27,15 @@ set public = excluded.public,
     file_size_limit = excluded.file_size_limit,
     allowed_mime_types = excluded.allowed_mime_types;
 
--- Anyone can view a profile image. Only the owner can add, replace, or remove files
--- stored under their own user-id folder.
-create policy "profile_images_select" on storage.objects
-for select to public
-using (bucket_id = 'profile-images');
+-- The bucket is private. A raw object address is refused. The server serves a
+-- short-lived signed URL. Only the owner can read, add, replace, or remove
+-- files stored under their own user-id folder.
+create policy "profile_images_select_own" on storage.objects
+for select to authenticated
+using (
+  bucket_id = 'profile-images'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
 
 create policy "profile_images_insert_own" on storage.objects
 for insert to authenticated

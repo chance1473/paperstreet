@@ -23,7 +23,6 @@ import {
   imageSurface,
   inspectProfileImage,
   isBuiltInBackground,
-  profileImagePublicUrl,
   profileImageUploadTarget,
   soundtrackSrc,
   type ProfileImageKind,
@@ -72,6 +71,8 @@ export function AppearanceForm({
   username,
   displayName,
   avatarPath,
+  avatarUrl,
+  backgroundUrl,
   backgroundChoice,
   soundtrackChoice,
 }: {
@@ -79,6 +80,8 @@ export function AppearanceForm({
   username: string;
   displayName: string;
   avatarPath: string | null;
+  avatarUrl: string | null;
+  backgroundUrl: string | null;
   backgroundChoice: string | null;
   soundtrackChoice: string | null;
 }) {
@@ -97,7 +100,7 @@ export function AppearanceForm({
   const [imageBust, setImageBust] = useState<number | null>(null);
   const bustSource = `${avatarPath ?? ""}\0${background ?? ""}`;
   const [seenBustSource, setSeenBustSource] = useState(bustSource);
-  const savedAvatar = profileImagePublicUrl(avatarPath);
+  const savedAvatar = avatarUrl;
 
   if (backgroundChoice !== seenBackground) {
     setSeenBackground(backgroundChoice);
@@ -126,15 +129,16 @@ export function AppearanceForm({
     return () => window.clearTimeout(id);
   }, [avatarPath, background]);
 
-  const remoteBackground =
-    background && !isBuiltInBackground(background) ? profileImagePublicUrl(background) : null;
+  const remoteBackground = background && !isBuiltInBackground(background) ? backgroundUrl : null;
   const previewBackground = localBackground
     ? imageSurface(localBackground)
     : remoteBackground && imageBust
-      ? imageSurface(`${remoteBackground}?v=${imageBust}`)
-      : deskSurface(background);
+      ? imageSurface(`${remoteBackground}${remoteBackground.includes("?") ? "&" : "?"}v=${imageBust}`)
+      : deskSurface(background, remoteBackground);
   const initial = displayName.slice(0, 1).toUpperCase() || "P";
-  const avatarSrc = localAvatar ?? (savedAvatar && imageBust ? `${savedAvatar}?v=${imageBust}` : savedAvatar);
+  const avatarSrc =
+    localAvatar ??
+    (savedAvatar && imageBust ? `${savedAvatar}${savedAvatar.includes("?") ? "&" : "?"}v=${imageBust}` : savedAvatar);
 
   async function saveChoice(patch: {
     avatarPath?: string;

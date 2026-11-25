@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
-import { ownedProfileImageUrl } from "@/lib/appearance";
+import { signedProfileImageUrl } from "@/lib/profile-image-url";
 import { getProfile } from "@/lib/portfolio";
 import { getSessionUser } from "@/lib/supabase/session";
 import { hasPublicSupabaseEnv } from "@/lib/utils";
@@ -27,7 +27,7 @@ export default async function PlatformLayout({ children }: { children: React.Rea
   return (
     <AppShell
       displayName={profile?.displayName ?? "Trader"}
-      avatarUrl={ownedProfileImageUrl(user.id, profile?.avatarPath)}
+      avatarUrl={await signedProfileImageUrl(profile?.avatarPath)}
     >
       {children}
     </AppShell>
