@@ -149,6 +149,9 @@ export default function HomePage() {
           <span>PaperStreet</span>
           <span className="flex flex-wrap gap-x-4 gap-y-1">
             <span>Paper trading only. No real-money deposits or brokerage orders.</span>
+            <Link href="/limits" className="underline-offset-4 hover:underline">
+              What this app does not do
+            </Link>
             <Link href="/privacy" className="underline-offset-4 hover:underline">Privacy</Link>
             <Link href="/terms" className="underline-offset-4 hover:underline">Terms</Link>
           </span>
