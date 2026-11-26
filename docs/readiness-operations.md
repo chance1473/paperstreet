@@ -1,5 +1,19 @@
 # Trading and operations readiness
 
+## Settings read from the environment
+
+`.env.example` is the list. None of these values is written into the source. There is no staging copy of them in the repository.
+
+| Setting | What it is |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Address of the database project. Read from the environment. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser key for that project. Read from the environment. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server key for trades and reset. Read from the environment. Never sent to the browser. |
+| `ALPACA_API_KEY` | Market-data key. Read from the environment. Never sent to the browser. |
+| `ALPACA_API_SECRET` | Market-data secret. Read from the environment. Never sent to the browser. |
+| `NEXT_PUBLIC_APP_URL` | Address used in auth mail. Read from the environment. Local default in the example is `http://localhost:3000`. |
+
+
 This source review covers the PaperStreet code on main at `354e77f`.
 Local verification and deployed settings are listed separately.
 
